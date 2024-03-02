@@ -1,11 +1,13 @@
 <script lang="ts">
 	import logo from "./assets/svelte.png";
+	import AudioInput from "./lib/AudioInput.svelte";
 	import Counter from "./lib/Counter.svelte";
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
 
 <main>
-	<VisualizeMicrophone />
+	<AudioInput />
+	<!-- <VisualizeMicrophone /> -->
 </main>
 
 <style>
@@ -13,7 +15,15 @@
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
 			Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 	}
-
+	:global(html, body) {
+		margin: 0;
+		padding: 0;
+	}
+	:global(body *) {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
 	main {
 		text-align: center;
 		margin: 0 auto;
