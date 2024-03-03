@@ -2,11 +2,13 @@
 	import logo from "./assets/svelte.png";
 	import AudioInput from "./lib/AudioInput.svelte";
 	import Counter from "./lib/Counter.svelte";
+	import TestWebGl from "./lib/TestWebGl/TestWebGl.svelte";
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
 
 <main>
-	<AudioInput />
+	<TestWebGl />
+	<!-- <AudioInput /> -->
 	<!-- <VisualizeMicrophone /> -->
 </main>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Meyda from "meyda";
 	import { onMount } from "svelte";
+	import WebGlCanvas from "./WebGLCanvas.svelte";
 
 	let audioBuffer: AudioBuffer;
 	let audioContext: AudioContext;
@@ -131,6 +132,11 @@
 	};
 </script>
 
+<WebGlCanvas
+	buffer={features?.buffer ?? []}
+	chromaHue={300}
+	rms={features?.rms ?? 0.5}
+/>
 <canvas
 	bind:this={canvas}
 	width={window.innerWidth}
