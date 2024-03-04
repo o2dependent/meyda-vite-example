@@ -87,5 +87,5 @@ void main()
 		finalColor += col * d;
 	}
 
-	gl_FragColor = vec4(finalColor, (-abs(gl_FragCoord.y / (iResolution.y) - .5) - .5));
+	gl_FragColor = vec4(finalColor / 1.0, (-abs(gl_FragCoord.y / (iResolution.y) - .5) - .5));
 }

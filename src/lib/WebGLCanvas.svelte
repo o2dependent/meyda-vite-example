@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import fragmentShaderSource from "./fragmentShaderSource.glsl?raw";
+	import fragmentShaderSource from "./shaders/test-tunnel/fragmentShaderSource.glsl?raw";
 	import { vertexShaderSource } from "./vertexShaderSource";
 
 	export let chromaHue: number;

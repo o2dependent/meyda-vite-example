@@ -5,8 +5,8 @@
 	import { programInfo } from "./programInfo.store";
 	import { buffers } from "./buffers.store";
 	import { renderScene } from "./renderScene";
-	import vertexShaderSource from "../vertexShaderSource.glsl?raw";
-	import fragmentShaderSource from "../fragmentShaderSource.glsl?raw";
+	import vertexShaderSource from "../shaders/test-tunnel/vertexShaderSource.glsl?raw";
+	import fragmentShaderSource from "../shaders/test-tunnel/fragmentShaderSource.glsl?raw";
 
 	let canvas: HTMLCanvasElement;
 	let width = window.innerWidth;
