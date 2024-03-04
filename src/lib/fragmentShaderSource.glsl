@@ -2,7 +2,7 @@ precision highp float;
 
 uniform vec3 iResolution;
 uniform float iTime;
-uniform vec4 iMouse;
+// uniform vec4 iMouse;
 
 vec3 palette(float t)
 {
@@ -33,4 +33,5 @@ void main()
 		finalColor += col * d;
 	}
 	gl_FragColor = vec4(finalColor, 1.0);
+	// gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

@@ -1,34 +1,38 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { initBuffers } from "./initBuffers";
-	import { drawScene } from "./drawScene";
 	import { gl } from "./gl.store";
+	import { programInfo } from "./programInfo.store";
+	import { buffers } from "./buffers.store";
+	import { renderScene } from "./renderScene";
+	import vertexShaderSource from "../vertexShaderSource.glsl?raw";
+	import fragmentShaderSource from "../fragmentShaderSource.glsl?raw";
 
 	let canvas: HTMLCanvasElement;
 
 	// Vertex shader program
-	const vsSource = `
-    attribute vec4 aVertexPosition;
-		attribute vec4 aVertexColor;
+	// const vsSource = `
+	//   attribute vec4 aVertexPosition;
+	// 	attribute vec4 aVertexColor;
 
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
+	//   uniform mat4 uModelViewMatrix;
+	//   uniform mat4 uProjectionMatrix;
 
-		varying lowp vec4 vColor;
+	// 	varying lowp vec4 vColor;
 
-    void main() {
-      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-			vColor = aVertexColor;
-    }
-  `;
+	//   void main() {
+	//     gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+	// 		vColor = aVertexColor;
+	//   }
+	// `;
 
-	const fsSource = `
-		varying lowp vec4 vColor;
+	// const fsSource = `
+	// 	varying lowp vec4 vColor;
 
-    void main() {
-      gl_FragColor = vColor;
-    }
-  `;
+	//   void main() {
+	//     gl_FragColor = vColor;
+	//   }
+	// `;
 
 	//
 	// Initialize a shader program, so WebGL knows how to draw our data
@@ -92,15 +96,22 @@
 		gl.set(_gl);
 		// Initialize a shader program; this is where all the lighting
 		// for the vertices and so forth is established.
-		const shaderProgram = initShaderProgram($gl, vsSource, fsSource);
+		const shaderProgram = initShaderProgram(
+			$gl,
+			vertexShaderSource,
+			fragmentShaderSource,
+		);
 
-		const programInfo = {
+		programInfo.set({
 			program: shaderProgram,
 			attribLocations: {
 				vertexPosition: $gl.getAttribLocation(shaderProgram, "aVertexPosition"),
 				vertexColor: $gl.getAttribLocation(shaderProgram, "aVertexColor"),
 			},
 			uniformLocations: {
+				iResolution: $gl.getUniformLocation(shaderProgram, "iResolution"),
+				iTime: $gl.getUniformLocation(shaderProgram, "iTime"),
+				// iMouse: $gl.getUniformLocation(shaderProgram, "iMouse"),
 				modelViewMatrix: $gl.getUniformLocation(
 					shaderProgram,
 					"uModelViewMatrix",
@@ -110,16 +121,10 @@
 					"uProjectionMatrix",
 				),
 			},
-		};
-		const buffers = initBuffers($gl);
-		let i = 0;
-		const anim = () => {
-			drawScene($gl, programInfo, buffers, [0, 0, i * -3.0]);
-			i = (i + 0.1) % 10;
-			requestAnimationFrame(anim);
-		};
-		anim();
+		});
+		buffers.set(initBuffers($gl));
 
+		renderScene(0);
 		// drawScene($gl, programInfo, buffers, [0, 0, -10.0]);
 	});
 </script>
