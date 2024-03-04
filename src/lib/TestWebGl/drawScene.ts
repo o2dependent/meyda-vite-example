@@ -1,5 +1,29 @@
-import { mat4 } from "gl-matrix";
+import { ReadonlyVec3, mat4 } from "gl-matrix";
 import { initBuffers } from "./initBuffers";
+import { readonly } from "svelte/store";
+
+// Tell WebGL to pull out colors from color buffer into vertexColor attr
+const setColorAttribute = (
+	gl: WebGLRenderingContext,
+	programInfo: Record<string, any>,
+	buffers: ReturnType<typeof initBuffers>,
+) => {
+	const numComponents = 4;
+	const type = gl.FLOAT;
+	const normalize = false;
+	const stride = 0;
+	const offset = 0;
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+	gl.vertexAttribPointer(
+		programInfo.attribLocations.vertexColor,
+		numComponents,
+		type,
+		normalize,
+		stride,
+		offset,
+	);
+	gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
+};
 
 // Tell WebGL how to pull out the positions from the position
 // buffer into the vertexPosition attribute.
@@ -30,6 +54,7 @@ export const drawScene = (
 	gl: WebGLRenderingContext,
 	programInfo: Record<string, any>,
 	buffers: ReturnType<typeof initBuffers>,
+	translate: ReadonlyVec3 = [-0.0, 0.0, -6.0],
 ) => {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clearDepth(1.0);
@@ -63,12 +88,12 @@ export const drawScene = (
 	mat4.translate(
 		modelViewMatrix,
 		modelViewMatrix,
-		[-0.0, 0.0, -6.0], // amount to translate
+		translate, // amount to translate: ;
 	);
 
 	// let webgl know how to pull positions from the pos buffer into vertexPosition attribute
 	setPositionAttribute(gl, programInfo, buffers);
-
+	setColorAttribute(gl, programInfo, buffers);
 	// tell webgl to use out program when drawing
 	gl.useProgram(programInfo.program);
 
