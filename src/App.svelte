@@ -6,11 +6,10 @@
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
 
-<main>
-	<TestWebGl />
-	<!-- <AudioInput /> -->
-	<!-- <VisualizeMicrophone /> -->
-</main>
+<TestWebGl />
+
+<!-- <AudioInput /> -->
+<!-- <VisualizeMicrophone /> -->
 
 <style>
 	:root {
@@ -18,6 +17,7 @@
 			Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 	}
 	:global(html, body) {
+		height: 100%;
 		margin: 0;
 		padding: 0;
 	}
@@ -25,40 +25,5 @@
 		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
-	}
-	main {
-		text-align: center;
-		margin: 0 auto;
-	}
-
-	img {
-		height: 16rem;
-		width: 16rem;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4rem;
-		font-weight: 100;
-		line-height: 1.1;
-		margin: 2rem auto;
-		max-width: 14rem;
-	}
-
-	p {
-		max-width: 14rem;
-		margin: 1rem auto;
-		line-height: 1.35;
-	}
-
-	@media (min-width: 480px) {
-		h1 {
-			max-width: none;
-		}
-
-		p {
-			max-width: none;
-		}
 	}
 </style>
