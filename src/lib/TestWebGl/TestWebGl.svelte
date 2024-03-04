@@ -9,7 +9,8 @@
 	import fragmentShaderSource from "../fragmentShaderSource.glsl?raw";
 
 	let canvas: HTMLCanvasElement;
-
+	let width = window.innerWidth;
+	let height = window.innerHeight;
 	// Vertex shader program
 	// const vsSource = `
 	//   attribute vec4 aVertexPosition;
@@ -125,8 +126,21 @@
 		buffers.set(initBuffers($gl));
 
 		renderScene(0);
+
+		const onResize = () => {
+			width = window.innerWidth;
+			height = window.innerHeight;
+			canvas.width = width;
+			canvas.height = height;
+			$gl.viewport(0, 0, width, height);
+		};
+		window.addEventListener("resize", onResize);
+		return () => {
+			window.removeEventListener("resize", onResize);
+			$gl.deleteProgram(shaderProgram);
+		};
 		// drawScene($gl, programInfo, buffers, [0, 0, -10.0]);
 	});
 </script>
 
-<canvas bind:this={canvas} id="glcanvas-test" width="640" height="480"></canvas>
+<canvas bind:this={canvas} id="glcanvas-test" {width} {height}></canvas>
