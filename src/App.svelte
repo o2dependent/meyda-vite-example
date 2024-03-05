@@ -7,9 +7,10 @@
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
 
-<Metaballs />
+<!-- <Metaballs /> -->
 
-<!-- <TestWebGl /> -->
+<TestWebGl />
+
 <!-- <AudioInput /> -->
 <!-- <VisualizeMicrophone /> -->
 
