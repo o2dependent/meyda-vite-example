@@ -2,12 +2,14 @@
 	import logo from "./assets/svelte.png";
 	import AudioInput from "./lib/AudioInput.svelte";
 	import Counter from "./lib/Counter.svelte";
+	import Metaballs from "./lib/Metaballs/Metaballs.svelte";
 	import TestWebGl from "./lib/TestWebGl/TestWebGl.svelte";
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
 
-<TestWebGl />
+<Metaballs />
 
+<!-- <TestWebGl /> -->
 <!-- <AudioInput /> -->
 <!-- <VisualizeMicrophone /> -->
 
@@ -20,6 +22,10 @@
 		height: 100%;
 		margin: 0;
 		padding: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		overflow: hidden !important;
 	}
 	:global(body *) {
 		box-sizing: border-box;
