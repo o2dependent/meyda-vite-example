@@ -24,7 +24,6 @@
 	let metaballs: MetaBall[] = [];
 	let gl: WebGLRenderingContext | null = null;
 	let metaballsHandle: WebGLUniformLocation | null | undefined;
-	let metaballVelocitiesHandle: WebGLUniformLocation | null | undefined;
 	let program: WebGLProgram | null | undefined;
 	let canAttract = false;
 
@@ -97,13 +96,6 @@
 		}
 
 		gl?.uniform3fv(metaballsHandle!, dataToSendToGPU);
-
-		const velocityDataToSendToGPU = new Float32Array(numMetaballs);
-		for (let i = 0; i < numMetaballs; i++) {
-			const mb = metaballs[i];
-			velocityDataToSendToGPU[i] = Math.sqrt(mb.vx * mb.vx + mb.vy * mb.vy);
-		}
-		gl?.uniform1fv(metaballVelocitiesHandle!, velocityDataToSendToGPU);
 
 		//Draw
 		gl?.drawArrays(gl?.TRIANGLE_STRIP, 0, 4);
@@ -178,10 +170,6 @@
 		);
 
 		metaballsHandle = getUniformLocation(program, "metaballs");
-		metaballVelocitiesHandle = getUniformLocation(
-			program,
-			"metaballVelocities",
-		);
 
 		requestAnimationFrame(loop);
 

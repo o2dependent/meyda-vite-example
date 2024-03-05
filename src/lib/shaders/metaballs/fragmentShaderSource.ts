@@ -15,14 +15,12 @@ const float WIDTH = ${width >> 0}.0;
 const float HEIGHT = ${height >> 0}.0;
 
 uniform vec3 metaballs[${numMetaballs}];
-uniform float metaballVelocities[${numMetaballs}];
 
 void main(){
 		float x = gl_FragCoord.x;
 		float y = gl_FragCoord.y;
 
 		float sum = 0.0;
-    float velocity = 0.0;
 		for (int i = 0; i < ${numMetaballs}; i++) {
 				vec3 metaball = metaballs[i];
 				float dx = metaball.x - x;
@@ -30,7 +28,6 @@ void main(){
 				float radius = metaball.z;
 
 				sum += ((radius * radius) / (dx * dx + dy * dy));
-        velocity += metaballVelocities[i];
 		}
 
 		if (sum >= .99) {
