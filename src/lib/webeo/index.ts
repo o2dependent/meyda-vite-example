@@ -1,31 +1,18 @@
-export interface ProgramInfo {}
+import {
+	VertexBuffers,
+	WebEOVertexAttributes,
+	WebEOUniformLocations,
+	ConstructorBuffers,
+	WebEOVertexAttributesArgs,
+	AWebEO,
+} from "./types";
 
-export interface VertexBuffers {
-	aVertexPosition: WebGLBuffer;
-	[key: string]: WebGLBuffer;
-}
-
-export interface ConstructorBuffers {
-	aVertexPosition?: number[];
-	[key: string]: number[];
-}
-
-export class WebEO {
+export class WebEO extends AWebEO {
 	gl: WebGLRenderingContext;
-	programInfo: ProgramInfo;
-	vertexBuffers: VertexBuffers;
+	vBuffers: VertexBuffers;
 	program: WebGLProgram;
-	attribLocations: {
-		[key: string]: number;
-	};
-	uniformLocations: {
-		iResolution: WebGLUniformLocation;
-		iTime: WebGLUniformLocation;
-		// iMouse: WebGLUniformLocation;
-		modelViewMatrix: WebGLUniformLocation;
-		projectionMatrix: WebGLUniformLocation;
-		[key: string]: WebGLUniformLocation;
-	};
+	vAttrib: WebEOVertexAttributes;
+	uniformLocations: WebEOUniformLocations;
 
 	constructor(
 		_gl: WebGLRenderingContext,
@@ -33,12 +20,13 @@ export class WebEO {
 		fragmentShader: string,
 		_vertexBuffers?: ConstructorBuffers,
 	) {
+		super();
 		const DEFAULT_VERTEX_BUFFERS: ConstructorBuffers = {
 			aVertexPosition: [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0],
 		};
 
 		this.gl = _gl;
-		this.vertexBuffers = this._initBuffers({
+		this.vBuffers = this._initBuffers({
 			...DEFAULT_VERTEX_BUFFERS,
 			...(_vertexBuffers ?? {}),
 		});
@@ -106,6 +94,13 @@ export class WebEO {
 				stride: 0,
 				offset: 0,
 			};
+
+		// Get attribute location in the vertex shader
+		const attributeLocation = this.gl.getAttribLocation(
+			this.program,
+			attributeName,
+		);
+
 		// Create a buffer
 		const buffer = this.gl.createBuffer();
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
@@ -115,12 +110,6 @@ export class WebEO {
 			this.gl.ARRAY_BUFFER,
 			new Float32Array(data),
 			this.gl.STATIC_DRAW,
-		);
-
-		// Get attribute location in the vertex shader
-		const attributeLocation = this.gl.getAttribLocation(
-			this.program,
-			attributeName,
 		);
 
 		// Configure the attribute to use the buffer
@@ -145,16 +134,32 @@ export class WebEO {
 		return newBuffers;
 	}
 
-	setAttribute() {
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
+	setVertexAttributeBuffer(
+		key: string,
+		data: number[],
+		newArgs?: Partial<WebEOVertexAttributesArgs>,
+	) {
+		this.vAttrib[key].args = {
+			...this.vAttrib[key].args,
+			...newArgs,
+		};
+		const { args, location } = this.vAttrib[key];
+		const buffer = this.vBuffers[key];
+		const { numComponents, normalize, stride, offset } = args;
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+		this.gl.bufferData(
+			this.gl.ARRAY_BUFFER,
+			new Float32Array(data),
+			this.gl.STATIC_DRAW,
+		);
 		this.gl.vertexAttribPointer(
-			this.attribLocations.vertexPosition,
+			location,
 			numComponents,
-			type,
+			this.gl.FLOAT,
 			normalize,
 			stride,
 			offset,
 		);
-		this.gl.enableVertexAttribArray(this.attribLocations.vertexPosition);
+		this.gl.enableVertexAttribArray(location);
 	}
 }
