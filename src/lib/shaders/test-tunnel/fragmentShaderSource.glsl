@@ -4,6 +4,8 @@ uniform vec3 iResolution;
 uniform float iTime;
 // uniform vec4 iMouse;
 
+varying lowp vec4 vColor;
+
 //https://iquilezles.org/articles/palettes/
 vec3 palette(float t)
 {
@@ -103,7 +105,10 @@ void main()
 		finalColor += col * d;
 	}
 
-	gl_FragColor = vec4(finalColor, 3.0);
+	// IDK what's going on here. I think i need to add the backbuffer to a uniform?
+	// vec2 position = (gl_FragCoord.xy / iResolution.xy);
+	// vec4 color = texture2D(backbuffer, position);
+	gl_FragColor = vColor + vec4(finalColor, 1.0);
 	// gl_FragColor = vec4(finalColor * -1.3, 3.0);
 	// float xVal = abs((gl_FragCoord.y - abs(iResolution.y / 2.0)) / (iResolution.y));
 	// float yVal = ((gl_FragCoord.x - abs(iResolution.x / 2.0)) / (iResolution.x));
