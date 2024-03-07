@@ -132,20 +132,21 @@
 	};
 </script>
 
-<WebGlCanvas
-	buffer={features?.buffer ?? []}
-	chromaHue={300}
-	rms={features?.rms ?? 0.5}
-/>
 <canvas
 	bind:this={canvas}
 	width={window.innerWidth}
 	height={window.innerHeight}
 />
-<input type="file" accept=".mp3, .mp4" on:change={handleFileChange} />
-<button on:click={playAudio}>Play</button>
-<button on:click={stopAudio}>Stop</button>
-<pre>{logValue}</pre>
+<div
+	style="position: fixed; bottom: 1rem; right: 1rem; padding: 0.5rem; background: #ffffffA0;"
+>
+	<input type="file" accept=".mp3, .mp4" on:change={handleFileChange} />
+	<button on:click={playAudio}>Play</button>
+	<button on:click={stopAudio}>Stop</button>
+	<pre>{features?.buffer?.length ?? "NONE"}</pre>
+</div>
+<pre
+	style="position: fixed; bottom: 1rem; left: 1rem; padding: 0.5rem; background: #ffffffA0; max-height: 80vh; overflow-y: auto;">{logValue}</pre>
 
 <style>
 	canvas {

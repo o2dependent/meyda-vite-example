@@ -9,9 +9,10 @@
 
 <!-- <Metaballs /> -->
 
-<TestWebGl />
+<!-- <TestWebGl /> -->
 
-<!-- <AudioInput /> -->
+<AudioInput />
+
 <!-- <VisualizeMicrophone /> -->
 
 <style>
