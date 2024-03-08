@@ -5,10 +5,9 @@ import {
 	WebEOUniformLocations,
 	ConstructorBuffers,
 	WebEOVertexAttributesArgs,
-	AWebEO,
 } from "./types";
 
-export class WebEO extends AWebEO {
+export class WebEO {
 	gl: WebGLRenderingContext;
 	vBuffers: WebEOVertexBuffers;
 	program: WebGLProgram;
@@ -17,11 +16,10 @@ export class WebEO extends AWebEO {
 
 	constructor(
 		_gl: WebGLRenderingContext,
-		vertextShader: string,
+		vertexShader: string,
 		fragmentShader: string,
 		_vertexBuffers?: ConstructorBuffers,
 	) {
-		super();
 		const DEFAULT_VERTEX_BUFFERS: ConstructorBuffers = {
 			aVertexPosition: [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0],
 		};
@@ -31,7 +29,7 @@ export class WebEO extends AWebEO {
 			...DEFAULT_VERTEX_BUFFERS,
 			...(_vertexBuffers ?? {}),
 		});
-		this.program = this._initShaderProgram(vertextShader, fragmentShader);
+		this.program = this._initShaderProgram(vertexShader, fragmentShader);
 	}
 
 	_loadShader(
@@ -164,6 +162,10 @@ export class WebEO extends AWebEO {
 		this.gl.enableVertexAttribArray(location);
 	}
 
+	_createUniformLocations() {}
+
+	setUniform(): void {}
+
 	drawScene(t: number): void {
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		this.gl.clearDepth(1.0);
@@ -211,6 +213,7 @@ export class WebEO extends AWebEO {
 		);
 
 		{
+			// no clue why I have this in a scope bracket, but i'mma leave it since I'm scared to remove it
 			const offset = 0;
 			const vertexCount = 4;
 			this.gl.drawArrays(this.gl.TRIANGLE_STRIP, offset, vertexCount);
