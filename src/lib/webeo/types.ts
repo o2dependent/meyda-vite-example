@@ -1,5 +1,6 @@
-//SECTION INTERFACES AND TYPES
-export interface VertexBuffers {
+//ANCHOR - Interfaces and Types
+//ANCHOR - Properties
+export interface WebEOVertexBuffers {
 	aVertexPosition: WebGLBuffer;
 	[key: string]: WebGLBuffer;
 }
@@ -17,7 +18,6 @@ export interface WebEOVertexAttributes {
 		args: WebEOVertexAttributesArgs;
 	};
 }
-
 export interface WebEOUniformLocations {
 	iResolution: WebGLUniformLocation;
 	iTime: WebGLUniformLocation;
@@ -26,19 +26,18 @@ export interface WebEOUniformLocations {
 	projectionMatrix: WebGLUniformLocation;
 	[key: string]: WebGLUniformLocation;
 }
-
+//ANCHOR - Constructor Values
 export interface ConstructorBuffers {
 	aVertexPosition?: number[];
 	[key: string]: number[];
 }
-//!SECTION
 
-//SECTION CLASS DEFINITION
+//ANCHOR - Class Definition
 export abstract class AWebEO {
 	// --- Properties ---
 	abstract gl: WebGLRenderingContext;
-	abstract vBuffers: VertexBuffers;
 	abstract program: WebGLProgram;
+	abstract vBuffers: WebEOVertexBuffers;
 	abstract vAttrib: WebEOVertexAttributes;
 	abstract uniformLocations: WebEOUniformLocations;
 
@@ -63,7 +62,7 @@ export abstract class AWebEO {
 		},
 	): WebGLBuffer;
 
-	abstract _initBuffers(_buffers: ConstructorBuffers): VertexBuffers;
+	abstract _initBuffers(_buffers: ConstructorBuffers): WebEOVertexBuffers;
 
 	abstract _createUniformLocations();
 
@@ -78,4 +77,3 @@ export abstract class AWebEO {
 
 	abstract setUniform(): void;
 }
-//!SECTION
