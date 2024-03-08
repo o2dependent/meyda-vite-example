@@ -1,5 +1,6 @@
+import { mat4 } from "gl-matrix";
 import {
-	VertexBuffers,
+	WebEOVertexBuffers,
 	WebEOVertexAttributes,
 	WebEOUniformLocations,
 	ConstructorBuffers,
@@ -9,7 +10,7 @@ import {
 
 export class WebEO extends AWebEO {
 	gl: WebGLRenderingContext;
-	vBuffers: VertexBuffers;
+	vBuffers: WebEOVertexBuffers;
 	program: WebGLProgram;
 	vAttrib: WebEOVertexAttributes;
 	uniformLocations: WebEOUniformLocations;
@@ -127,7 +128,7 @@ export class WebEO extends AWebEO {
 	}
 
 	_initBuffers(_buffers: ConstructorBuffers) {
-		const newBuffers = {} as VertexBuffers;
+		const newBuffers = {} as WebEOVertexBuffers;
 		Object.keys(_buffers).forEach((key) => {
 			newBuffers[key] = this._createAttributeBuffer(key, _buffers[key]);
 		});
@@ -161,5 +162,58 @@ export class WebEO extends AWebEO {
 			offset,
 		);
 		this.gl.enableVertexAttribArray(location);
+	}
+
+	drawScene(t: number): void {
+		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		this.gl.clearDepth(1.0);
+		this.gl.enable(this.gl.DEPTH_TEST);
+		this.gl.depthFunc(this.gl.LEQUAL); // near things obscure far things
+
+		// clear canvas
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+		// Create a perspective matrix, a special matrix that is
+		// used to simulate the distortion of perspective in a camera.
+		// Our field of view is 45 degrees, with a width/height
+		// ratio that matches the display size of the canvas
+		// and we only want to see objects between 0.1 units
+		// and 100 units away from the camera.
+
+		const fieldOfView = (45 * Math.PI) / 180; // in radians
+		// const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
+		const aspect = this.gl.canvas.width / this.gl.canvas.height;
+		const zNear = 0.1;
+		const zFar = 100.0;
+		const projectionMatrix = mat4.create();
+
+		// set perspective using values above
+		mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+
+		// set draw pos to identity point at center of scene
+		const modelViewMatrix = mat4.create();
+
+		// move to draw the square
+		mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -1.0]);
+
+		// tell webgl to use out program when drawing
+		this.gl.useProgram(this.program);
+
+		this.gl.uniformMatrix4fv(
+			this.uniformLocations.projectionMatrix,
+			false,
+			projectionMatrix,
+		);
+		this.gl.uniformMatrix4fv(
+			this.uniformLocations.modelViewMatrix,
+			false,
+			modelViewMatrix,
+		);
+
+		{
+			const offset = 0;
+			const vertexCount = 4;
+			this.gl.drawArrays(this.gl.TRIANGLE_STRIP, offset, vertexCount);
+		}
 	}
 }
