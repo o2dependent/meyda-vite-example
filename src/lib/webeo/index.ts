@@ -2,9 +2,10 @@ import { mat4 } from "gl-matrix";
 import {
 	WebEOVertexBuffers,
 	WebEOVertexAttributes,
-	WebEOUniformLocations,
-	ConstructorBuffers,
+	ConstructorVertexBuffers,
 	WebEOVertexAttributesArgs,
+	ConstructorUniforms,
+	WebEOUniforms,
 } from "./types";
 
 export class WebEO {
@@ -12,23 +13,25 @@ export class WebEO {
 	vBuffers: WebEOVertexBuffers;
 	program: WebGLProgram;
 	vAttrib: WebEOVertexAttributes;
-	uniformLocations: WebEOUniformLocations;
+	uniforms: WebEOUniforms;
 
 	constructor(
 		_gl: WebGLRenderingContext,
 		vertexShader: string,
 		fragmentShader: string,
-		_vertexBuffers?: ConstructorBuffers,
+		_uniforms?: ConstructorUniforms,
+		_vertexBuffers?: ConstructorVertexBuffers,
 	) {
-		const DEFAULT_VERTEX_BUFFERS: ConstructorBuffers = {
+		const DEFAULT_VERTEX_BUFFERS: ConstructorVertexBuffers = {
 			aVertexPosition: [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0],
 		};
 
 		this.gl = _gl;
-		this.vBuffers = this._initBuffers({
+		this._initBuffers({
 			...DEFAULT_VERTEX_BUFFERS,
 			...(_vertexBuffers ?? {}),
 		});
+		this._initUniforms(_uniforms);
 		this.program = this._initShaderProgram(vertexShader, fragmentShader);
 	}
 
@@ -125,12 +128,12 @@ export class WebEO {
 		return buffer;
 	}
 
-	_initBuffers(_buffers: ConstructorBuffers) {
+	_initBuffers(_buffers: ConstructorVertexBuffers) {
 		const newBuffers = {} as WebEOVertexBuffers;
 		Object.keys(_buffers).forEach((key) => {
 			newBuffers[key] = this._createAttributeBuffer(key, _buffers[key]);
 		});
-		return newBuffers;
+		this.vBuffers = newBuffers;
 	}
 
 	setVertexAttributeBuffer(
@@ -162,9 +165,22 @@ export class WebEO {
 		this.gl.enableVertexAttribArray(location);
 	}
 
-	_createUniformLocations() {}
+	_initUniforms(_uniforms: ConstructorUniforms) {
+		this.uniforms = { ...(this.uniforms ?? ({} as WebEOUniforms)) };
+		Object.keys(_uniforms).forEach((key) => {
+			this.uniforms[key] = {
+				type: _uniforms[key].type,
+				location: this.gl.getUniformLocation(this.program, key),
+			};
+			this.setUniform(key, ..._uniforms[key].value);
+		});
+	}
 
-	setUniform(): void {}
+	setUniform(key: string, ...values: number[]): void {
+		const { location, type } = this.uniforms[key];
+		const method = `uniform${type}`;
+		this.gl[method](location, ...values);
+	}
 
 	drawScene(t: number): void {
 		this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -202,12 +218,12 @@ export class WebEO {
 		this.gl.useProgram(this.program);
 
 		this.gl.uniformMatrix4fv(
-			this.uniformLocations.projectionMatrix,
+			this.uniforms.projectionMatrix.location,
 			false,
 			projectionMatrix,
 		);
 		this.gl.uniformMatrix4fv(
-			this.uniformLocations.modelViewMatrix,
+			this.uniforms.modelViewMatrix.location,
 			false,
 			modelViewMatrix,
 		);
