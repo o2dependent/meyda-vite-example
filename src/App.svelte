@@ -4,6 +4,7 @@
 	import Counter from "./lib/Counter.svelte";
 	import Metaballs from "./lib/Metaballs/Metaballs.svelte";
 	import PolyLines from "./lib/PolyLines/PolyLines.svelte";
+	import PostFluidDistortion from "./lib/PostFluidDistortion/PostFluidDistortion.svelte";
 	import TestWebGl from "./lib/TestWebGl/TestWebGl.svelte";
 	import VisualizeMicrophone from "./lib/VisualizeMicrophone.svelte";
 </script>
@@ -12,7 +13,9 @@
 
 <!-- <TestWebGl /> -->
 
-<PolyLines />
+<!-- <PolyLines /> -->
+
+<PostFluidDistortion />
 
 <!-- <AudioInput /> -->
 
