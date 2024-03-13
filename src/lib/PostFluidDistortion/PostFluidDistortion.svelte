@@ -363,7 +363,7 @@
 		const dyeRes = 512;
 
 		// Main inputs to control look and feel of fluid
-		const iterations = 3;
+		const iterations = 10;
 		const densityDissipation = 0.97;
 		const velocityDissipation = 0.98;
 		const pressureDissipation = 0.8;
