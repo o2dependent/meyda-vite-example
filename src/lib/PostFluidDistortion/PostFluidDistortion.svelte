@@ -25,7 +25,11 @@
 					vec3 fluid = texture2D(tFluid, vUv).rgb;
 					vec2 uv = vUv - fluid.rg * 0.0002;
 
-					gl_FragColor = mix( texture2D(tMap, uv), vec4(fluid * 0.1 + 0.5, 1), step(0.5, vUv.x) ) ;
+					// full fluid
+					gl_FragColor = vec4(fluid * 0.1 + 0.5, 1), step(0.5, vUv.x);
+
+					// half texture half fluid
+					// gl_FragColor = mix( texture2D(tMap, uv), vec4(fluid * 0.1 + 0.5, 1), step(0.5, vUv.x) ) ;
 
 					// Oscillate between fluid values and the distorted scene
 					// gl_FragColor = mix(texture2D(tMap, uv), vec4(fluid * 0.1 + 0.5, 1), smoothstep(0.0, 0.7, sin(uTime)));
@@ -190,7 +194,9 @@
 					force *= curl * C;
 					force.y *= -1.0;
 					vec2 vel = texture2D(uVelocity, vUv).xy;
-					gl_FragColor = vec4(vel + force * dt, 0.0, 1.0);
+					// smoothness will be more smooth the lower the value and more chaotic the higher the value
+					float smoothness = 1.;
+					gl_FragColor = vec4(vel + force * dt * smoothness, 0.0, 1.0);
 			}
 	`;
 
@@ -212,7 +218,12 @@
 					float C = texture2D(uPressure, vUv).x;
 					float divergence = texture2D(uDivergence, vUv).x;
 					float pressure = (L + R + B + T - divergence) * 0.25;
-					gl_FragColor = vec4(pressure, 0.0, 0.0, 1.0);
+					// surface tension will make things more "jelloy" when the value is higher.
+					// this should probably be scaled with resolution so it doesn't "over jiggle" when the screen is small.
+					// this value shouldn't exceed around 1.075 or it will start to break pixels.
+					// very flow values (0.1) will make the fluid like stagnant water.
+					float surface_tension = 1.;
+					gl_FragColor = vec4(pressure * surface_tension, 0.0, 0.0, 1.0);
 			}
 	`;
 
@@ -363,7 +374,7 @@
 		const dyeRes = 512;
 
 		// Main inputs to control look and feel of fluid
-		const iterations = 10;
+		const iterations = 3;
 		const densityDissipation = 0.97;
 		const velocityDissipation = 0.98;
 		const pressureDissipation = 0.8;
