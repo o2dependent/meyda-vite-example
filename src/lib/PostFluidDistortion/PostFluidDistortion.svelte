@@ -594,7 +594,13 @@
 			}),
 		});
 
-		const splats = [];
+		const splats = [] as {
+			x: number;
+			y: number;
+			dx: number;
+			dy: number;
+			radius?: number;
+		}[];
 
 		// Create handlers to get mouse position and velocity
 		const isTouchCapable = "ontouchstart" in window;
@@ -696,6 +702,12 @@
 			},
 		});
 
+		let movement = {
+			x: 0,
+			y: 0,
+			radius: 50,
+		};
+
 		requestAnimationFrame(update);
 		function update(t) {
 			requestAnimationFrame(update);
@@ -703,6 +715,26 @@
 			// Perform all of the fluid simulation renders
 			// No need to clear during sim, saving a number of GL calls.
 			gl.renderer.autoClear = false;
+
+			// make the movement go in a spiral
+			let newX = gl.canvas.width / 4 + Math.sin(t * 0.005) * movement.radius;
+			let newY = gl.canvas.height / 4 + Math.cos(t * 0.005) * movement.radius;
+
+			const deltaX = newX - movement.x;
+			const deltaY = newY - movement.y;
+			splats.push({
+				// Get mouse value in 0 to 1 range, with y flipped
+				x: movement.x / gl.renderer.width,
+				y: 1.0 - movement.y / gl.renderer.height,
+				dx: deltaX * 5.0,
+				dy: deltaY * -5.0,
+			});
+
+			movement.x = newX;
+			movement.y = newY;
+			movement.radius =
+				(Math.min(gl.canvas.width, gl.canvas.height) / 5) *
+				Math.cos(t * 0.0005);
 
 			// Render all of the inputs since last frame
 			for (let i = splats.length - 1; i >= 0; i--) {
