@@ -397,7 +397,7 @@
 		let rgba: ReturnType<typeof getSupportedFormat>,
 			rg: ReturnType<typeof getSupportedFormat>,
 			r: ReturnType<typeof getSupportedFormat>;
-
+		console.log({ isWebgl2: gl.renderer.isWebgl2, HALF_FLOAT: gl.HALF_FLOAT });
 		if (gl.renderer.isWebgl2) {
 			rgba = getSupportedFormat(gl, gl.RGBA16F, gl.RGBA, halfFloat);
 			rg = getSupportedFormat(gl, gl.RG16F, gl.RG, halfFloat);
