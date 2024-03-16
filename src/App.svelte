@@ -2,6 +2,7 @@
 	import logo from "./assets/svelte.png";
 	import AudioInput from "./lib/AudioInput.svelte";
 	import Counter from "./lib/Counter.svelte";
+	import Gallery from "./lib/Gallery/Gallery.svelte";
 	import Metaballs from "./lib/Metaballs/Metaballs.svelte";
 	import PolyLines from "./lib/PolyLines/PolyLines.svelte";
 	import PostFluidDistortion from "./lib/PostFluidDistortion/PostFluidDistortion.svelte";
@@ -15,7 +16,9 @@
 
 <!-- <PolyLines /> -->
 
-<PostFluidDistortion />
+<!-- <PostFluidDistortion /> -->
+
+<Gallery />
 
 <!-- <AudioInput /> -->
 
