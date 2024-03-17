@@ -167,7 +167,13 @@ export default class Media {
 		this.x = this.width * this.index;
 	}
 
-	update() {
-		this.plane.position.x = this.x;
+	update(scroll: {
+		ease: number;
+		position: number;
+		current: number;
+		target: number;
+		last: number;
+	}) {
+		this.plane.position.x = this.x - scroll.current * 0.1;
 	}
 }

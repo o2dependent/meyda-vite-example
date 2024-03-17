@@ -1,10 +1,12 @@
 import { Renderer, Camera, Transform, OGLRenderingContext, Plane } from "ogl";
+import NormalizedWheel from "normalize-wheel";
 import Mar9 from "./images/mar-9-2024.jpg";
 import Mar10 from "./images/mar-10-2024.jpg";
 import Mar11 from "./images/mar-11-2024.jpg";
 import Mar12 from "./images/mar-12-2024.jpg";
 import Mar13 from "./images/mar-13-2024.jpg";
 import Media from "./Media";
+import { lerp } from "../math";
 
 export default class GalleryApp {
 	screen: {
@@ -23,6 +25,22 @@ export default class GalleryApp {
 
 	mediasImages: { image: string; text: string }[];
 	medias: Media[];
+
+	isDown: boolean = false;
+	start: number = 0;
+	scroll: {
+		ease: number;
+		position: number;
+		current: number;
+		target: number;
+		last: number;
+	} = {
+		ease: 0.05,
+		position: 0,
+		current: 0,
+		target: 0,
+		last: 0,
+	};
 
 	constructor() {
 		this.createRenderer();
@@ -95,10 +113,31 @@ export default class GalleryApp {
 	/**
 	 * Events
 	 */
-	onTouchDown(e) {}
-	onTouchMove(e) {}
-	onTouchUp(e) {}
-	onWheel(e) {}
+	onTouchDown(e: TouchEvent | MouseEvent) {
+		this.isDown = true;
+
+		this.scroll.position = this.scroll.current;
+		this.start = "touches" in e ? e.touches[0].clientX : e.clientX;
+	}
+
+	onTouchMove(e: TouchEvent | MouseEvent) {
+		if (!this.isDown) return;
+
+		const x = "touches" in e ? e.touches[0].clientX : e.clientX;
+		const distance = (this.start - x) * 0.01;
+
+		this.scroll.target = this.scroll.position + distance;
+	}
+
+	onTouchUp(e: TouchEvent | MouseEvent) {
+		this.isDown = false;
+	}
+
+	onWheel(e: TouchEvent | MouseEvent) {
+		const normalized = NormalizedWheel(e);
+
+		this.scroll.target += normalized.pixelY * 0.005;
+	}
 
 	/**
 	 * Resize
@@ -137,11 +176,20 @@ export default class GalleryApp {
 	 * Update
 	 */
 	update() {
+		this.scroll.current = lerp(
+			this.scroll.current,
+			this.scroll.target,
+			this.scroll.ease,
+		);
+
 		if (this.medias) {
 			this.medias.forEach((media) =>
-				media?.update?.(/*this?.scroll, this?.direction*/),
+				media?.update?.(this?.scroll /*this?.direction*/),
 			);
 		}
+
+		this.scroll.last = this.scroll.current;
+
 		this.renderer.render({
 			scene: this.scene,
 			camera: this.camera,
