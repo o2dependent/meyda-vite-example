@@ -53,6 +53,9 @@ export default class Media {
 		width: number;
 		height: number;
 	};
+	extra: number = 0;
+	isBefore: boolean = false;
+	isAfter: boolean = false;
 
 	constructor({
 		geometry,
@@ -167,13 +170,36 @@ export default class Media {
 		this.x = this.width * this.index;
 	}
 
-	update(scroll: {
-		ease: number;
-		position: number;
-		current: number;
-		target: number;
-		last: number;
-	}) {
-		this.plane.position.x = this.x - scroll.current * 0.1;
+	update(
+		scroll: {
+			ease: number;
+			position: number;
+			current: number;
+			target: number;
+			last: number;
+		},
+		direction: "left" | "right",
+	) {
+		this.plane.position.x = this.x - scroll.current * 1.5 - this.extra;
+
+		const planeOffset = this.plane.scale.x / 2;
+		const viewportOffset = this.viewport.width;
+
+		this.isBefore = this.plane.position.x + planeOffset < -viewportOffset;
+		this.isAfter = this.plane.position.x - planeOffset > viewportOffset;
+
+		if (direction === "right" && this.isBefore) {
+			this.extra -= this.widthTotal;
+
+			this.isBefore = false;
+			this.isAfter = false;
+		}
+
+		if (direction === "left" && this.isAfter) {
+			this.extra += this.widthTotal;
+
+			this.isBefore = false;
+			this.isAfter = false;
+		}
 	}
 }

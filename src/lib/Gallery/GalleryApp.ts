@@ -41,6 +41,7 @@ export default class GalleryApp {
 		target: 0,
 		last: 0,
 	};
+	direction: "left" | "right" = "left";
 
 	constructor() {
 		this.createRenderer();
@@ -182,9 +183,15 @@ export default class GalleryApp {
 			this.scroll.ease,
 		);
 
+		if (this.scroll.current > this.scroll.last) {
+			this.direction = "right";
+		} else {
+			this.direction = "left";
+		}
+
 		if (this.medias) {
 			this.medias.forEach((media) =>
-				media?.update?.(this?.scroll /*this?.direction*/),
+				media?.update?.(this?.scroll, this?.direction),
 			);
 		}
 
