@@ -13,6 +13,7 @@
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@tsconfig/svelte": "^2.0.1",
     "@types/meyda": "^4.3.8",
+    "@types/normalize-wheel": "^1.0.4",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.7",
     "svelte-preprocess": "^4.9.8",
@@ -23,6 +24,7 @@
   "dependencies": {
     "gl-matrix": "^3.4.3",
     "meyda": "^5.6.2",
+    "normalize-wheel": "^1.0.1",
     "ogl": "^1.0.6"
   }
 }
