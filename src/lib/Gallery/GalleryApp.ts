@@ -5,8 +5,13 @@ import Mar10 from "./images/mar-10-2024.jpg";
 import Mar11 from "./images/mar-11-2024.jpg";
 import Mar12 from "./images/mar-12-2024.jpg";
 import Mar13 from "./images/mar-13-2024.jpg";
+import Mar14 from "./images/mar-14-2024.jpg";
+import Mar15 from "./images/mar-15-2024.jpg";
+import Mar16 from "./images/mar-16-2024.jpg";
 import Media from "./Media";
 import { lerp } from "../math";
+import debounce from "lodash/debounce";
+import { DebouncedFunc } from "lodash";
 
 export default class GalleryApp {
 	screen: {
@@ -43,6 +48,8 @@ export default class GalleryApp {
 	};
 	direction: "left" | "right" = "left";
 
+	onCheckDebounce: DebouncedFunc<() => void>;
+
 	constructor() {
 		this.createRenderer();
 		this.createCamera();
@@ -56,6 +63,8 @@ export default class GalleryApp {
 		this.update();
 
 		this.addEventListeners();
+
+		this.onCheckDebounce = debounce(this.onCheck, 200);
 	}
 
 	createRenderer() {
@@ -92,6 +101,9 @@ export default class GalleryApp {
 			{ image: Mar11, text: "Mar 11 2024" },
 			{ image: Mar12, text: "Mar 12 2024" },
 			{ image: Mar13, text: "Mar 13 2024" },
+			{ image: Mar14, text: "Mar 14 2024" },
+			{ image: Mar15, text: "Mar 15 2024" },
+			{ image: Mar16, text: "Mar 16 2024" },
 		];
 
 		this.medias = this.mediasImages.map(({ image, text }, index) => {
@@ -132,9 +144,12 @@ export default class GalleryApp {
 
 	onTouchUp(e: TouchEvent | MouseEvent) {
 		this.isDown = false;
+
+		this.onCheck();
 	}
 
 	onWheel(e: TouchEvent | MouseEvent) {
+		this.onCheckDebounce();
 		const normalized = NormalizedWheel(e);
 
 		this.scroll.target += normalized.pixelY * 0.005;
@@ -171,6 +186,17 @@ export default class GalleryApp {
 				}),
 			);
 		}
+	}
+
+	/**
+	 * On Snapping Check
+	 */
+	onCheck() {
+		const { width } = this.medias[0];
+		const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
+		const item = width * itemIndex;
+
+		this.scroll.target = item * Math.sign(this.scroll.target);
 	}
 
 	/**
