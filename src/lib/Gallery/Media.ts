@@ -9,6 +9,7 @@ import {
 } from "ogl";
 import vertex from "./shaders/vertex.glsl?raw";
 import fragment from "./shaders/fragment.glsl?raw";
+import { map } from "../math";
 
 interface ConstructorArgs {
 	gl: OGLRenderingContext;
@@ -181,6 +182,17 @@ export default class Media {
 		direction: "left" | "right",
 	) {
 		this.plane.position.x = this.x - scroll.current * 1.5 - this.extra;
+
+		this.plane.rotation.z = map(
+			this.plane.position.x,
+			-this.widthTotal,
+			this.widthTotal,
+			Math.PI / 4,
+			-Math.PI / 4,
+		);
+
+		this.plane.position.y =
+			Math.cos((this.plane.position.x / this.widthTotal) * Math.PI) * 5 - 5;
 
 		const planeOffset = this.plane.scale.x / 2;
 		const viewportOffset = this.viewport.width;
