@@ -1,4 +1,10 @@
-import { Renderer, Camera, Transform, OGLRenderingContext } from "ogl";
+import { Renderer, Camera, Transform, OGLRenderingContext, Plane } from "ogl";
+import Mar9 from "./images/mar-9-2024.jpg";
+import Mar10 from "./images/mar-10-2024.jpg";
+import Mar11 from "./images/mar-11-2024.jpg";
+import Mar12 from "./images/mar-12-2024.jpg";
+import Mar13 from "./images/mar-13-2024.jpg";
+import Media from "./Media";
 
 export default class GalleryApp {
 	screen: {
@@ -13,6 +19,10 @@ export default class GalleryApp {
 	gl: OGLRenderingContext;
 	camera: Camera;
 	scene: Transform;
+	planeGeometry: Plane;
+
+	mediasImages: { image: string; text: string }[];
+	medias: Media[];
 
 	constructor() {
 		this.createRenderer();
@@ -20,6 +30,9 @@ export default class GalleryApp {
 		this.createScene();
 
 		this.onResize();
+
+		this.createGeometry();
+		this.createGalleryMedia();
 
 		this.update();
 
@@ -30,7 +43,7 @@ export default class GalleryApp {
 		this.renderer = new Renderer();
 
 		this.gl = this.renderer.gl;
-		this.gl.clearColor(0, 0, 0, 1);
+		this.gl.clearColor(0.05, 0.05, 0.05, 1);
 
 		document.body.appendChild(this.gl.canvas);
 	}
@@ -45,6 +58,40 @@ export default class GalleryApp {
 		this.scene = new Transform();
 	}
 
+	createGeometry() {
+		this.planeGeometry = new Plane(this.gl, {
+			heightSegments: 50,
+			widthSegments: 100,
+		});
+	}
+
+	createGalleryMedia() {
+		console.log(Mar9);
+		this.mediasImages = [
+			{ image: Mar9, text: "Mar 9 2024" },
+			{ image: Mar10, text: "Mar 10 2024" },
+			{ image: Mar11, text: "Mar 11 2024" },
+			{ image: Mar12, text: "Mar 12 2024" },
+			{ image: Mar13, text: "Mar 13 2024" },
+		];
+
+		this.medias = this.mediasImages.map(({ image, text }, index) => {
+			const media = new Media({
+				geometry: this.planeGeometry,
+				gl: this.gl,
+				image,
+				index,
+				length: this.mediasImages.length,
+				scene: this.scene,
+				screen: this.screen,
+				text,
+				viewport: this.viewport,
+				renderer: this.renderer,
+			});
+
+			return media;
+		});
+	}
 	/**
 	 * Events
 	 */
@@ -75,17 +122,30 @@ export default class GalleryApp {
 			width,
 			height,
 		};
+
+		if (this.medias) {
+			this.medias.forEach((media) =>
+				media.onResize({
+					screen: this.screen,
+					viewport: this.viewport,
+				}),
+			);
+		}
 	}
 
 	/**
 	 * Update
 	 */
 	update() {
+		if (this.medias) {
+			this.medias.forEach((media) =>
+				media?.update?.(/*this?.scroll, this?.direction*/),
+			);
+		}
 		this.renderer.render({
 			scene: this.scene,
 			camera: this.camera,
 		});
-
 		requestAnimationFrame(this.update.bind(this));
 	}
 
