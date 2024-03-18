@@ -196,6 +196,8 @@ export default class GalleryApp {
 		const itemIndex = Math.round(Math.abs(this.scroll.target) / width);
 		const item = width * itemIndex;
 
+		console.log(item);
+
 		this.scroll.target = item * Math.sign(this.scroll.target);
 	}
 

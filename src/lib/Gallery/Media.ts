@@ -145,6 +145,7 @@ export default class Media {
 
 		if (viewport) {
 			this.viewport = viewport;
+
 			this.plane.program.uniforms.uViewportSizes.value = [
 				this.viewport.width,
 				this.viewport.height,
@@ -181,18 +182,17 @@ export default class Media {
 		},
 		direction: "left" | "right",
 	) {
-		this.plane.position.x = this.x - scroll.current * 1.5 - this.extra;
+		this.plane.position.x = this.x - scroll.current - this.extra;
 
 		this.plane.rotation.z = map(
 			this.plane.position.x,
 			-this.widthTotal,
 			this.widthTotal,
-			Math.PI / 4,
-			-Math.PI / 4,
+			Math.PI,
+			-Math.PI,
 		);
-
 		this.plane.position.y =
-			Math.cos((this.plane.position.x / this.widthTotal) * Math.PI) * 5 - 5;
+			Math.cos((this.plane.position.x / this.widthTotal) * Math.PI) * 25 - 25;
 
 		const planeOffset = this.plane.scale.x / 2;
 		const viewportOffset = this.viewport.width;
