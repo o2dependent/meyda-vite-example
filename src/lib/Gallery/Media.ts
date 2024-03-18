@@ -7,8 +7,8 @@ import {
 	Texture,
 	Transform,
 } from "ogl";
-import vertex from "./shaders/vertex.glsl?raw";
-import fragment from "./shaders/fragment.glsl?raw";
+import vertex from "./shaders/media/vertex.glsl?raw";
+import fragment from "./shaders/media/fragment.glsl?raw";
 import { map } from "../math";
 
 interface ConstructorArgs {
