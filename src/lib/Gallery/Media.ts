@@ -10,6 +10,7 @@ import {
 import vertex from "./shaders/media/vertex.glsl?raw";
 import fragment from "./shaders/media/fragment.glsl?raw";
 import { map } from "../math";
+import { Title } from "./Title";
 
 interface ConstructorArgs {
 	gl: OGLRenderingContext;
@@ -57,6 +58,7 @@ export default class Media {
 	extra: number = 0;
 	isBefore: boolean = false;
 	isAfter: boolean = false;
+	title: Title;
 
 	constructor({
 		geometry,
@@ -85,6 +87,17 @@ export default class Media {
 		this.createMesh();
 
 		this.onResize({ screen, viewport });
+
+		this.createTitle();
+	}
+
+	createTitle() {
+		this.title = new Title({
+			gl: this.gl,
+			plane: this.plane,
+			renderer: this.renderer,
+			text: this.text,
+		});
 	}
 
 	createShader() {
@@ -100,6 +113,8 @@ export default class Media {
 				uPlaneSizes: { value: [0, 0] },
 				uImageSizes: { value: [0, 0] },
 				uViewportSizes: { value: [this.viewport.width, this.viewport.height] },
+				uSpeed: { value: 0 },
+				uTime: { value: 0 },
 			},
 			transparent: true,
 		});
@@ -182,6 +197,8 @@ export default class Media {
 		},
 		direction: "left" | "right",
 	) {
+		this.program.uniforms.uTime.value += 0.04;
+
 		this.plane.position.x = this.x - scroll.current - this.extra;
 
 		this.plane.rotation.z = map(

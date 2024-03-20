@@ -63,7 +63,7 @@ export default class GalleryApp {
 		this.renderer = new Renderer();
 
 		this.gl = this.renderer.gl;
-		this.gl.clearColor(0.05, 0.05, 0.05, 1);
+		this.gl.clearColor(0.125, 0.125, 0.125, 1);
 
 		document.body.appendChild(this.gl.canvas);
 	}
