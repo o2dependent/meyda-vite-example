@@ -87,14 +87,14 @@ export default class GalleryApp {
 
 	createGalleryMedia() {
 		this.mediasImages = [
-			{ image: "/public/images/mar-9-2024.jpg", text: "Mar 9 2024" },
-			{ image: "/public/images/mar-10-2024.jpg", text: "Mar 10 2024" },
-			{ image: "/public/images/mar-11-2024.jpg", text: "Mar 11 2024" },
-			{ image: "/public/images/mar-12-2024.jpg", text: "Mar 12 2024" },
-			{ image: "/public/images/mar-13-2024.jpg", text: "Mar 13 2024" },
-			{ image: "/public/images/mar-14-2024.jpg", text: "Mar 14 2024" },
-			{ image: "/public/images/mar-15-2024.jpg", text: "Mar 15 2024" },
-			{ image: "/public/images/mar-16-2024.jpg", text: "Mar 16 2024" },
+			{ image: "/images/mar-9-2024.jpg", text: "Mar 9 2024" },
+			{ image: "/images/mar-10-2024.jpg", text: "Mar 10 2024" },
+			{ image: "/images/mar-11-2024.jpg", text: "Mar 11 2024" },
+			{ image: "/images/mar-12-2024.jpg", text: "Mar 12 2024" },
+			{ image: "/images/mar-13-2024.jpg", text: "Mar 13 2024" },
+			{ image: "/images/mar-14-2024.jpg", text: "Mar 14 2024" },
+			{ image: "/images/mar-15-2024.jpg", text: "Mar 15 2024" },
+			{ image: "/images/mar-16-2024.jpg", text: "Mar 16 2024" },
 		];
 
 		this.medias = this.mediasImages.map(({ image, text }, index) => {
