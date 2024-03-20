@@ -21,7 +21,7 @@ interface ConstructorArgs {
 	renderer: Renderer;
 }
 
-export class Title {
+export class IndexTitle {
 	gl: OGLRenderingContext;
 	scene: Transform;
 	plane: Mesh;
@@ -108,7 +108,7 @@ export class Title {
 			font,
 			// letterSpacing: -0.05,
 			width: 4,
-			size: 0.075,
+			size: 0.045,
 			text: this.text,
 			wordSpacing: 0,
 		});
@@ -123,7 +123,7 @@ export class Title {
 		// geometry.computeBoundingBox();
 
 		this.mesh = new Mesh(this.gl, { geometry, program: this.program });
-		this.mesh.position.y = -0.585;
+		this.mesh.position.y = -0.525;
 		this.mesh.setParent(this.plane);
 	}
 }

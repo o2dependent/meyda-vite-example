@@ -11,6 +11,8 @@ import vertex from "./shaders/media/vertex.glsl?raw";
 import fragment from "./shaders/media/fragment.glsl?raw";
 import { map } from "../math";
 import { Title } from "./Title";
+import { IndexTitle } from "./IndexTitle";
+import { pad, padStart } from "lodash";
 
 interface ConstructorArgs {
 	gl: OGLRenderingContext;
@@ -58,6 +60,7 @@ export default class Media {
 	extra: number = 0;
 	isBefore: boolean = false;
 	isAfter: boolean = false;
+	indexTitle: IndexTitle;
 	title: Title;
 
 	constructor({
@@ -97,6 +100,12 @@ export default class Media {
 			plane: this.plane,
 			renderer: this.renderer,
 			text: this.text,
+		});
+		this.indexTitle = new IndexTitle({
+			gl: this.gl,
+			plane: this.plane,
+			renderer: this.renderer,
+			text: `${padStart(`${this.index + 1}`, 2, "0")}`,
 		});
 	}
 
