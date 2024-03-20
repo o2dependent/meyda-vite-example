@@ -1,13 +1,5 @@
 import { Renderer, Camera, Transform, OGLRenderingContext, Plane } from "ogl";
 import NormalizedWheel from "normalize-wheel";
-import Mar9 from "./images/mar-9-2024.jpg";
-import Mar10 from "./images/mar-10-2024.jpg";
-import Mar11 from "./images/mar-11-2024.jpg";
-import Mar12 from "./images/mar-12-2024.jpg";
-import Mar13 from "./images/mar-13-2024.jpg";
-import Mar14 from "./images/mar-14-2024.jpg";
-import Mar15 from "./images/mar-15-2024.jpg";
-import Mar16 from "./images/mar-16-2024.jpg";
 import Media from "./Media";
 import { lerp } from "../math";
 import debounce from "lodash/debounce";
@@ -94,16 +86,15 @@ export default class GalleryApp {
 	}
 
 	createGalleryMedia() {
-		console.log(Mar9);
 		this.mediasImages = [
-			{ image: Mar9, text: "Mar 9 2024" },
-			{ image: Mar10, text: "Mar 10 2024" },
-			{ image: Mar11, text: "Mar 11 2024" },
-			{ image: Mar12, text: "Mar 12 2024" },
-			{ image: Mar13, text: "Mar 13 2024" },
-			{ image: Mar14, text: "Mar 14 2024" },
-			{ image: Mar15, text: "Mar 15 2024" },
-			{ image: Mar16, text: "Mar 16 2024" },
+			{ image: "/public/images/mar-9-2024.jpg", text: "Mar 9 2024" },
+			{ image: "/public/images/mar-10-2024.jpg", text: "Mar 10 2024" },
+			{ image: "/public/images/mar-11-2024.jpg", text: "Mar 11 2024" },
+			{ image: "/public/images/mar-12-2024.jpg", text: "Mar 12 2024" },
+			{ image: "/public/images/mar-13-2024.jpg", text: "Mar 13 2024" },
+			{ image: "/public/images/mar-14-2024.jpg", text: "Mar 14 2024" },
+			{ image: "/public/images/mar-15-2024.jpg", text: "Mar 15 2024" },
+			{ image: "/public/images/mar-16-2024.jpg", text: "Mar 16 2024" },
 		];
 
 		this.medias = this.mediasImages.map(({ image, text }, index) => {
