@@ -4,6 +4,7 @@ import Media from "./Media";
 import { lerp } from "../math";
 import debounce from "lodash/debounce";
 import { DebouncedFunc } from "lodash";
+import { Background } from "./Background";
 
 export default class GalleryApp {
 	screen: {
@@ -42,6 +43,8 @@ export default class GalleryApp {
 
 	onCheckDebounce: DebouncedFunc<() => void>;
 
+	background: Background;
+
 	constructor() {
 		this.createRenderer();
 		this.createCamera();
@@ -51,12 +54,23 @@ export default class GalleryApp {
 
 		this.createGeometry();
 		this.createGalleryMedia();
+		this.createBackground();
 
 		this.update();
 
 		this.addEventListeners();
 
 		this.onCheckDebounce = debounce(this.onCheck, 200);
+	}
+
+	createBackground() {
+		this.background = new Background({
+			gl: this.gl,
+			scene: this.scene,
+			viewport: this.viewport,
+			screen: this.screen,
+			renderer: this.renderer,
+		});
 	}
 
 	createRenderer() {
@@ -171,6 +185,11 @@ export default class GalleryApp {
 			height,
 		};
 
+		this.background?.onResize?.({
+			screen: this.screen,
+			viewport: this.viewport,
+		});
+
 		if (this.medias) {
 			this.medias.forEach((media) =>
 				media.onResize({
@@ -216,12 +235,17 @@ export default class GalleryApp {
 			);
 		}
 
-		this.scroll.last = this.scroll.current;
+		if (this.background) {
+			this.background.update(this.scroll, this.direction);
+		}
 
 		this.renderer.render({
 			scene: this.scene,
 			camera: this.camera,
 		});
+
+		this.scroll.last = this.scroll.current;
+
 		requestAnimationFrame(this.update.bind(this));
 	}
 
