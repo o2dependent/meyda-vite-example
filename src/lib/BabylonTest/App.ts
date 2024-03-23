@@ -10,8 +10,11 @@ import {
 	MeshBuilder,
 	Color3,
 	StandardMaterial,
+	GlowLayer,
+	VertexBuffer,
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
+import { NeonBox } from "./NeonBox";
 
 export class BabylonTestApp {
 	constructor(canvas: HTMLCanvasElement) {
@@ -33,16 +36,27 @@ export class BabylonTestApp {
 			new Vector3(1, 1, 0),
 			scene,
 		);
+		light1.intensity = 0.2;
+
+		// const plane = MeshBuilder.CreatePlane("plane", { size: 5 }, scene);
+		// plane.rotation.x = Math.PI / 2;
+		// plane.position.y = -1;
+		// plane.position.z = -5;
+		// plane.scaling.x = 5;
+		// plane.scaling.y = 5;
 
 		const nodes = [];
 
-		const eye1 = new Eye(scene);
-		eye1.setPosition(0.75, 0, -10);
-		nodes.push(eye1);
+		const neonBox = new NeonBox(scene);
+		nodes.push(neonBox);
 
-		const eye2 = new Eye(scene);
-		eye2.setPosition(-0.75, 0, -10);
-		nodes.push(eye2);
+		// const eye1 = new Eye(scene);
+		// eye1.setPosition(0.75, 0, -10);
+		// nodes.push(eye1);
+
+		// const eye2 = new Eye(scene);
+		// eye2.setPosition(-0.75, 0, -10);
+		// nodes.push(eye2);
 
 		// hide/show the Inspector
 		window.addEventListener("keydown", (ev) => {
@@ -67,6 +81,7 @@ export class BabylonTestApp {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
 			nodes.forEach((node) => node.update(elapsedTime));
+
 			scene.render();
 		});
 	}
