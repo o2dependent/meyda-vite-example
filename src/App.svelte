@@ -1,6 +1,7 @@
 <script lang="ts">
 	import logo from "./assets/svelte.png";
 	import AudioInput from "./lib/AudioInput.svelte";
+	import BabylonTest from "./lib/BabylonTest/BabylonTest.svelte";
 	import Counter from "./lib/Counter.svelte";
 	import Gallery from "./lib/Gallery/Gallery.svelte";
 	import Metaballs from "./lib/Metaballs/Metaballs.svelte";
@@ -18,7 +19,9 @@
 
 <!-- <PostFluidDistortion /> -->
 
-<Gallery />
+<BabylonTest />
+
+<!-- <Gallery /> -->
 
 <!-- <AudioInput /> -->
 
@@ -31,6 +34,8 @@
 	}
 	:global(html, body) {
 		height: 100%;
+		width: 100%;
+
 		margin: 0;
 		padding: 0;
 		display: flex;
@@ -42,5 +47,9 @@
 		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
+	}
+	:global(#app) {
+		height: 100%;
+		width: 100%;
 	}
 </style>
