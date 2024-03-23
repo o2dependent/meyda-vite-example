@@ -11,6 +11,7 @@ import {
 	Color3,
 	StandardMaterial,
 } from "@babylonjs/core";
+import { Eye } from "./Eye";
 
 export class BabylonTestApp {
 	constructor(canvas: HTMLCanvasElement) {
@@ -33,36 +34,15 @@ export class BabylonTestApp {
 			scene,
 		);
 
-		const sclera: Mesh = MeshBuilder.CreateSphere(
-			"sclera",
-			{ diameter: 1 },
-			scene,
-		);
-		const iris: Mesh = MeshBuilder.CreateSphere(
-			"iris",
-			{ diameter: 0.5 },
-			scene,
-		);
-		iris.parent = sclera;
-		iris.position.x = 0.28;
-		iris.scaling.y = 1.5;
-		iris.scaling.z = 1.5;
-		const irisMaterial = new StandardMaterial("irisMaterial", scene);
-		irisMaterial.diffuseColor = Color3.Red();
-		iris.material = irisMaterial;
+		const nodes = [];
 
-		const pupil: Mesh = MeshBuilder.CreateSphere(
-			"pupil",
-			{ diameter: 0.45 },
-			scene,
-		);
-		pupil.parent = sclera;
-		pupil.position.x = 0.33;
-		pupil.scaling.y = 1.5;
-		pupil.scaling.z = 1.5;
-		const pupilMaterial = new StandardMaterial("pupilMaterial", scene);
-		pupilMaterial.diffuseColor = Color3.Black();
-		pupil.material = pupilMaterial;
+		const eye1 = new Eye(scene);
+		eye1.setPosition(0.75, 0, -10);
+		nodes.push(eye1);
+
+		const eye2 = new Eye(scene);
+		eye2.setPosition(-0.75, 0, -10);
+		nodes.push(eye2);
 
 		// hide/show the Inspector
 		window.addEventListener("keydown", (ev) => {
@@ -86,16 +66,7 @@ export class BabylonTestApp {
 		engine.runRenderLoop(() => {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
-			pupil.scaling.y = (Math.sin(elapsedTime / 1000) + 1) * 0.25 + 1;
-			pupil.scaling.z = (Math.sin(elapsedTime / 1000) + 1) * 0.25 + 1;
-			sclera.rotation.y =
-				(Math.cos(elapsedTime / 1000) + 1 + Math.sin(elapsedTime / 1000)) *
-					0.25 +
-				1;
-			sclera.rotation.z =
-				(Math.cos(elapsedTime / 1000) + 1 + Math.sin(elapsedTime / 1000)) *
-					0.25 +
-				1;
+			nodes.forEach((node) => node.update(elapsedTime));
 			scene.render();
 		});
 	}
