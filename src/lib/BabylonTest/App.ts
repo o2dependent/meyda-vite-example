@@ -48,7 +48,13 @@ export class BabylonTestApp {
 		const nodes = [];
 
 		const neonBox = new NeonBox(scene);
+		neonBox.setPosition(0, 0, -5);
 		nodes.push(neonBox);
+		for (let i = 0; i < 2; i++) {
+			const instance = neonBox.createInstance("boxInstance" + i);
+			instance.position.x = i;
+			nodes.push(instance);
+		}
 
 		// const eye1 = new Eye(scene);
 		// eye1.setPosition(0.75, 0, -10);
@@ -80,7 +86,7 @@ export class BabylonTestApp {
 		engine.runRenderLoop(() => {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
-			nodes.forEach((node) => node.update(elapsedTime));
+			nodes.forEach((node) => node?.update?.(elapsedTime));
 
 			scene.render();
 		});

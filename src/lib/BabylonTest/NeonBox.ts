@@ -7,6 +7,7 @@ import {
 	StandardMaterial,
 	Color3,
 	Mesh,
+	Engine,
 } from "@babylonjs/core";
 
 export class NeonBox {
@@ -17,6 +18,12 @@ export class NeonBox {
 		const box = MeshBuilder.CreateBox("box", { size: 2 }, scene);
 		box.position.z = -5;
 		box.position.y = 0.75;
+
+		const boxMaterial = new StandardMaterial("boxMaterial", scene);
+		boxMaterial.diffuseColor = Color3.Teal();
+		boxMaterial.alpha = 0.95;
+		boxMaterial.alphaMode = Engine.ALPHA_PREMULTIPLIED_PORTERDUFF;
+		box.material = boxMaterial;
 
 		// Get the vertices of the box
 		const vertices = box.getVerticesData(VertexBuffer.PositionKind);
@@ -41,24 +48,27 @@ export class NeonBox {
 			mainTextureFixedSize: 1024,
 			blurKernelSize: 64,
 		});
-		gl.intensity = 0.5;
+		gl.intensity = 1;
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
 		neonMaterial.emissiveColor = Color3.Teal(); // Green emissive color
 		neonMaterial.disableLighting = true;
-		console.log(edges);
+
 		// Apply glow material to each edge vertex
+		const neonEdge = MeshBuilder.CreateSphere(
+			"neonEdges",
+			{ diameter: 0.25 },
+			scene,
+		);
+		neonEdge.parent = box;
+		neonEdge.material = neonMaterial;
 		edges.forEach(function (vertex, i) {
 			console.log(i);
-			const neonEdges = MeshBuilder.CreateSphere(
-				"neonEdges" + i,
-				{ diameter: 0.25 },
-				scene,
-			);
+			const neonEdges = neonEdge.createInstance("neonEdges" + i);
+			neonEdges.position = vertex;
 			neonEdges.parent = box;
 			neonEdges.material = neonMaterial;
-			neonEdges.position = vertex;
 
 			// gl.addExcludedMesh(neonLight); // Include the neon light mesh in the glow layer
 		});
@@ -129,7 +139,20 @@ export class NeonBox {
 		}
 	}
 
+	createInstance(name: string) {
+		return this.box.createInstance(name);
+	}
+
+	setPosition(x: number, y: number, z: number) {
+		this.box.position.x = x;
+		this.box.position.y = y;
+		this.box.position.z = z;
+	}
+
 	update(elapsedTime: number) {
-		// this.box.rotate(new Vector3(1, 1.25, 0.75), 0.01);
+		// this.box.rotate(new Vector3(1, 1.25, 1.75), 0.05);
+		// scale
+		// const scale = Math.sin(elapsedTime / 1000) * 0.25 + 1;
+		// this.box.scaling = new Vector3(scale, scale, scale);
 	}
 }
