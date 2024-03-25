@@ -12,8 +12,10 @@ import {
 
 export class NeonBox {
 	box: Mesh;
+	index: number;
 
-	constructor(scene: Scene) {
+	constructor(scene: Scene, index: number) {
+		this.index = index;
 		// Create a box
 		const box = MeshBuilder.CreateBox("box", { size: 2 }, scene);
 		box.position.z = -5;
@@ -25,30 +27,30 @@ export class NeonBox {
 		boxMaterial.alphaMode = Engine.ALPHA_PREMULTIPLIED_PORTERDUFF;
 		box.material = boxMaterial;
 
-		// Get the vertices of the box
-		const vertices = box.getVerticesData(VertexBuffer.PositionKind);
+		// // Get the vertices of the box
+		// const vertices = box.getVerticesData(VertexBuffer.PositionKind);
 
-		// Extract edge vertices
-		const edges = [];
-		for (let i = 0; i < vertices.length; i += 3) {
-			const vertex = new Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-			const faces = box.getVerticesData(VertexBuffer.NormalKind);
-			let count = 0;
-			for (let j = 0; j < faces.length; j += 3) {
-				const face = new Vector3(faces[j], faces[j + 1], faces[j + 2]);
-				if (vertex.equalsWithEpsilon(face, 0.001)) {
-					count++;
-				}
-			}
-			edges.push(vertex);
-		}
+		// // Extract edge vertices
+		// const edges = [];
+		// for (let i = 0; i < vertices.length; i += 3) {
+		// 	const vertex = new Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+		// 	const faces = box.getVerticesData(VertexBuffer.NormalKind);
+		// 	let count = 0;
+		// 	for (let j = 0; j < faces.length; j += 3) {
+		// 		const face = new Vector3(faces[j], faces[j + 1], faces[j + 2]);
+		// 		if (vertex.equalsWithEpsilon(face, 0.001)) {
+		// 			count++;
+		// 		}
+		// 	}
+		// 	edges.push(vertex);
+		// }
 
 		// Create a glow layer
 		const gl = new GlowLayer("glow", scene, {
 			mainTextureFixedSize: 1024,
-			blurKernelSize: 64,
+			blurKernelSize: 64 / 4,
 		});
-		gl.intensity = 1;
+		gl.intensity = 0.25;
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
@@ -56,24 +58,22 @@ export class NeonBox {
 		neonMaterial.disableLighting = true;
 
 		// Apply glow material to each edge vertex
-		const neonEdge = MeshBuilder.CreateSphere(
-			"neonEdges",
-			{ diameter: 0.25 },
-			scene,
-		);
-		neonEdge.parent = box;
-		neonEdge.material = neonMaterial;
-		edges.forEach(function (vertex, i) {
-			console.log(i);
-			const neonEdges = neonEdge.createInstance("neonEdges" + i);
-			neonEdges.position = vertex;
-			neonEdges.parent = box;
-			neonEdges.material = neonMaterial;
+		// const neonEdge = MeshBuilder.CreateSphere(
+		// 	"neonEdges",
+		// 	{ diameter: 0.25 },
+		// 	scene,
+		// );
+		// neonEdge.parent = box;
+		// neonEdge.material = neonMaterial;
+		// edges.forEach(function (vertex, i) {
+		// 	console.log(i);
+		// 	const neonEdges = neonEdge.createInstance("neonEdges" + i);
+		// 	neonEdges.position = vertex;
+		// 	neonEdges.parent = box;
+		// 	neonEdges.material = neonMaterial;
+		// });
+		// gl.addIncludedOnlyMesh(neonEdge); // Include the neon light mesh in the glow layer
 
-			// gl.addExcludedMesh(neonLight); // Include the neon light mesh in the glow layer
-		});
-
-		this.box = box;
 		const sides = [
 			{
 				position: new Vector3(1, 1, 0),
@@ -124,6 +124,7 @@ export class NeonBox {
 				rotation: new Vector3(0, 0, Math.PI / 2),
 			},
 		];
+		const tubes = [] as Mesh[];
 		for (let i = 0; i < sides.length; i++) {
 			const side = sides[i];
 			const neonTube = MeshBuilder.CreateCylinder(
@@ -134,9 +135,19 @@ export class NeonBox {
 			neonTube.parent = box;
 			neonTube.position = side.position;
 			neonTube.rotation = side.rotation;
-			neonTube.material = neonMaterial;
+			// neonTube.material = neonMaterial;
 			// neonTube.scaling = new Vector3(1, 1, vertex.subtract(next).length());
+			tubes.push(neonTube);
 		}
+
+		this.box = Mesh.MergeMeshes(
+			[box, ...tubes],
+			true,
+			false,
+			undefined,
+			false,
+			true,
+		);
 	}
 
 	createInstance(name: string) {
@@ -150,9 +161,6 @@ export class NeonBox {
 	}
 
 	update(elapsedTime: number) {
-		// this.box.rotate(new Vector3(1, 1.25, 1.75), 0.05);
-		// scale
-		// const scale = Math.sin(elapsedTime / 1000) * 0.25 + 1;
-		// this.box.scaling = new Vector3(scale, scale, scale);
+		// this.box.position.y = Math.sin(elapsedTime / 1000) * 0.25 + 0.75;
 	}
 }

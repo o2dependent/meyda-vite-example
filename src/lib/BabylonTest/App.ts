@@ -12,6 +12,7 @@ import {
 	StandardMaterial,
 	GlowLayer,
 	VertexBuffer,
+	Matrix,
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
@@ -24,9 +25,9 @@ export class BabylonTestApp {
 
 		const camera: ArcRotateCamera = new ArcRotateCamera(
 			"Camera",
-			Math.PI / 2,
-			Math.PI / 2,
-			2,
+			-Math.PI / 5,
+			Math.PI / 3,
+			200,
 			Vector3.Zero(),
 			scene,
 		);
@@ -46,15 +47,57 @@ export class BabylonTestApp {
 		// plane.scaling.y = 5;
 
 		const nodes = [];
+		// for (let i = 0; i < 10; i++) {
+		// 	for (let j = 0; j < 10; j++) {
+		// 		const neonBox = new NeonBox(scene, i * j);
+		// 		neonBox.setPosition(15 * i, 0, -15 * j);
+		// 		nodes.push(neonBox);
+		// 	}
+		// }
 
-		const neonBox = new NeonBox(scene);
-		neonBox.setPosition(0, 0, -5);
-		nodes.push(neonBox);
-		for (let i = 0; i < 2; i++) {
-			const instance = neonBox.createInstance("boxInstance" + i);
-			instance.position.x = i;
-			nodes.push(instance);
+		var box = MeshBuilder.CreateBox("root", { size: 1 });
+
+		var numPerSide = 40,
+			size = 50,
+			ofst = size / (numPerSide - 1);
+
+		var m = Matrix.Identity();
+		var col = 0,
+			index = 0;
+
+		let instanceCount = numPerSide * numPerSide * numPerSide;
+
+		let matricesData = new Float32Array(16 * instanceCount);
+		let colorData = new Float32Array(4 * instanceCount);
+
+		for (var x = 0; x < numPerSide; x++) {
+			m.addAtIndex(12, -size / 2 + ofst * x);
+			for (var y = 0; y < numPerSide; y++) {
+				m.addAtIndex(13, -size / 2 + ofst * y);
+				for (var z = 0; z < numPerSide; z++) {
+					m.addAtIndex(14, -size / 2 + ofst * z);
+
+					m.copyToArray(matricesData, index * 16);
+
+					var coli = Math.floor(col);
+
+					colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
+					colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
+					colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
+					colorData[index * 4 + 3] = 1.0;
+
+					index++;
+					col += 0xff0000 / instanceCount;
+				}
+			}
 		}
+
+		box.thinInstanceSetBuffer("matrix", matricesData, 16);
+		box.thinInstanceSetBuffer("color", colorData, 4);
+
+		box.material = new StandardMaterial("bmaterial");
+		box.material.disableLighting = true;
+		box.material.emissiveColor = Color3.White();
 
 		// const eye1 = new Eye(scene);
 		// eye1.setPosition(0.75, 0, -10);
