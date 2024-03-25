@@ -18,6 +18,14 @@ import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
 
 export class BabylonTestApp {
+	matricesData: Float32Array;
+	colorData: Float32Array;
+	instanceCount: number;
+	box: Mesh;
+	numPerSide: number;
+	size: number;
+	ofst: number;
+
 	constructor(canvas: HTMLCanvasElement) {
 		// initialize babylon scene and engine
 		const engine = new Engine(canvas, true);
@@ -57,47 +65,57 @@ export class BabylonTestApp {
 
 		var box = MeshBuilder.CreateBox("root", { size: 1 });
 
-		var numPerSide = 40,
-			size = 50,
-			ofst = size / (numPerSide - 1);
+		this.numPerSide = 40;
+		this.size = 2;
+		this.ofst = this.size / (this.numPerSide - 1);
 
-		var m = Matrix.Identity();
-		var col = 0,
+		this.instanceCount = this.numPerSide * this.numPerSide * this.numPerSide;
+
+		this.matricesData = new Float32Array(16 * this.instanceCount);
+		this.colorData = new Float32Array(4 * this.instanceCount);
+
+		let m = Matrix.Identity();
+		let col = 0,
 			index = 0;
 
-		let instanceCount = numPerSide * numPerSide * numPerSide;
+		for (let x = 0; x < this.numPerSide; x++) {
+			m.addAtIndex(12, -this.size / 2 + this.ofst * x);
+			for (let y = 0; y < this.numPerSide; y++) {
+				m.addAtIndex(13, -this.size / 2 + this.ofst * y);
+				for (let z = 0; z < this.numPerSide; z++) {
+					m.addAtIndex(14, -this.size / 2 + this.ofst * z);
 
-		let matricesData = new Float32Array(16 * instanceCount);
-		let colorData = new Float32Array(4 * instanceCount);
+					m.copyToArray(this.matricesData, index * 16);
 
-		for (var x = 0; x < numPerSide; x++) {
-			m.addAtIndex(12, -size / 2 + ofst * x);
-			for (var y = 0; y < numPerSide; y++) {
-				m.addAtIndex(13, -size / 2 + ofst * y);
-				for (var z = 0; z < numPerSide; z++) {
-					m.addAtIndex(14, -size / 2 + ofst * z);
+					const coli = Math.floor(col);
 
-					m.copyToArray(matricesData, index * 16);
-
-					var coli = Math.floor(col);
-
-					colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
-					colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
-					colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
-					colorData[index * 4 + 3] = 1.0;
+					this.colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
+					this.colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
+					this.colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
+					this.colorData[index * 4 + 3] = 1.0;
 
 					index++;
-					col += 0xff0000 / instanceCount;
+					col += 0xffffff / this.instanceCount;
 				}
 			}
 		}
 
-		box.thinInstanceSetBuffer("matrix", matricesData, 16);
-		box.thinInstanceSetBuffer("color", colorData, 4);
+		box.thinInstanceSetBuffer("matrix", this.matricesData, 16);
+		box.thinInstanceSetBuffer("color", this.colorData, 4);
 
-		box.material = new StandardMaterial("bmaterial");
-		box.material.disableLighting = true;
-		box.material.emissiveColor = Color3.White();
+		const gl = new GlowLayer("glow", scene, {
+			mainTextureFixedSize: 1024,
+			blurKernelSize: 64,
+		});
+		gl.intensity = 0.75;
+
+		const boxMaterial = new StandardMaterial("bmaterial", scene);
+		boxMaterial.emissiveColor = Color3.Red();
+		boxMaterial.disableLighting = true;
+		box.material = boxMaterial;
+		gl.addIncludedOnlyMesh(box);
+
+		this.box = box;
 
 		// const eye1 = new Eye(scene);
 		// eye1.setPosition(0.75, 0, -10);
@@ -130,7 +148,6 @@ export class BabylonTestApp {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
 			nodes.forEach((node) => node?.update?.(elapsedTime));
-
 			scene.render();
 		});
 	}
