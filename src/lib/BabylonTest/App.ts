@@ -16,6 +16,7 @@ import {
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
+import { Tunnel } from "./Tunnel";
 
 export class BabylonTestApp {
 	matricesData: Float32Array;
@@ -26,6 +27,8 @@ export class BabylonTestApp {
 	size: number;
 	ofst: number;
 
+	activeNodes: ("neonBox" | "tunnel")[] = ["tunnel"];
+
 	constructor(canvas: HTMLCanvasElement) {
 		// initialize babylon scene and engine
 		const engine = new Engine(canvas, true);
@@ -33,8 +36,8 @@ export class BabylonTestApp {
 
 		const camera: ArcRotateCamera = new ArcRotateCamera(
 			"Camera",
-			-Math.PI / 5,
-			Math.PI / 3,
+			0,
+			Math.PI / 2,
 			200,
 			Vector3.Zero(),
 			scene,
@@ -62,9 +65,18 @@ export class BabylonTestApp {
 		// 		nodes.push(neonBox);
 		// 	}
 		// }
-		const neonBox = new NeonBox(scene, 0);
-		neonBox.setPosition(0, 0, 0);
-		nodes.push(neonBox);
+
+		if (this.activeNodes.includes("neonBox")) {
+			const neonBox = new NeonBox(scene, 0);
+			neonBox.setPosition(0, 0, 0);
+			nodes.push(neonBox);
+		}
+
+		if (this.activeNodes.includes("tunnel")) {
+			const tunnel = new Tunnel(scene);
+			tunnel.setPosition(0, 0, 0);
+			nodes.push(tunnel);
+		}
 
 		// this.makeBox(scene);
 
