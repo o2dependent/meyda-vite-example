@@ -62,7 +62,52 @@ export class BabylonTestApp {
 		// 		nodes.push(neonBox);
 		// 	}
 		// }
+		const neonBox = new NeonBox(scene, 0);
+		neonBox.setPosition(0, 0, 0);
+		nodes.push(neonBox);
 
+		// this.makeBox(scene);
+
+		// const eye1 = new Eye(scene);
+		// eye1.setPosition(0.75, 0, -10);
+		// nodes.push(eye1);
+
+		// const eye2 = new Eye(scene);
+		// eye2.setPosition(-0.75, 0, -10);
+		// nodes.push(eye2);
+
+		// hide/show the Inspector
+		window.addEventListener("keydown", (ev) => {
+			// Shift+Ctrl+Alt+I
+			console.log(ev);
+			if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.code === "KeyI") {
+				if (scene.debugLayer.isVisible()) {
+					scene.debugLayer.hide();
+				} else {
+					scene.debugLayer.show();
+				}
+			}
+		});
+
+		// resize the babylon engine when the window is resized
+		window.addEventListener("resize", () => {
+			engine.resize();
+		});
+
+		// run the main render loop
+		let elapsedTime = 0;
+		engine.runRenderLoop(() => {
+			const engine = scene.getEngine();
+			elapsedTime += engine.getDeltaTime();
+			nodes.forEach((node) => node?.update?.(elapsedTime));
+
+			this.updateBox(elapsedTime);
+
+			scene.render();
+		});
+	}
+
+	makeBox(scene: Scene) {
 		var box = MeshBuilder.CreateBox("root", { size: 1 });
 
 		this.numPerSide = 40;
@@ -116,39 +161,40 @@ export class BabylonTestApp {
 		gl.addIncludedOnlyMesh(box);
 
 		this.box = box;
+	}
 
-		// const eye1 = new Eye(scene);
-		// eye1.setPosition(0.75, 0, -10);
-		// nodes.push(eye1);
+	updateBox(elapsedTime: number) {
+		if (!this.box) return;
+		this.size = Math.abs(Math.sin(elapsedTime / 1000) * 50);
+		this.ofst = this.size / (this.numPerSide - 1);
 
-		// const eye2 = new Eye(scene);
-		// eye2.setPosition(-0.75, 0, -10);
-		// nodes.push(eye2);
+		let m = Matrix.Identity();
+		let col = 0,
+			index = 0;
 
-		// hide/show the Inspector
-		window.addEventListener("keydown", (ev) => {
-			// Shift+Ctrl+Alt+I
-			if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.keyCode === 73) {
-				if (scene.debugLayer.isVisible()) {
-					scene.debugLayer.hide();
-				} else {
-					scene.debugLayer.show();
+		for (let x = 0; x < this.numPerSide; x++) {
+			m.addAtIndex(12, -this.size / 2 + this.ofst * x);
+			for (let y = 0; y < this.numPerSide; y++) {
+				m.addAtIndex(13, -this.size / 2 + this.ofst * y);
+				for (let z = 0; z < this.numPerSide; z++) {
+					m.addAtIndex(14, -this.size / 2 + this.ofst * z);
+
+					m.copyToArray(this.matricesData, index * 16);
+
+					const coli = Math.floor(col);
+
+					this.colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
+					this.colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
+					this.colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
+					this.colorData[index * 4 + 3] = 1.0;
+
+					index++;
+					col += 0xffffff / this.instanceCount;
 				}
 			}
-		});
+		}
 
-		// resize the babylon engine when the window is resized
-		window.addEventListener("resize", () => {
-			engine.resize();
-		});
-
-		// run the main render loop
-		let elapsedTime = 0;
-		engine.runRenderLoop(() => {
-			const engine = scene.getEngine();
-			elapsedTime += engine.getDeltaTime();
-			nodes.forEach((node) => node?.update?.(elapsedTime));
-			scene.render();
-		});
+		this.box.thinInstanceSetBuffer("matrix", this.matricesData, 16);
+		this.box.thinInstanceSetBuffer("color", this.colorData, 4);
 	}
 }

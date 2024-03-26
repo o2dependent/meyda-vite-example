@@ -8,11 +8,18 @@ import {
 	Color3,
 	Mesh,
 	Engine,
+	Matrix,
 } from "@babylonjs/core";
 
 export class NeonBox {
 	box: Mesh;
 	index: number;
+	matricesData: Float32Array;
+	colorData: Float32Array;
+	instanceCount: number;
+	numPerSide = 40;
+	size = 2;
+	offset = this.size / (this.numPerSide - 1);
 
 	constructor(scene: Scene, index: number) {
 		this.index = index;
@@ -23,8 +30,8 @@ export class NeonBox {
 
 		const boxMaterial = new StandardMaterial("boxMaterial", scene);
 		boxMaterial.diffuseColor = Color3.Teal();
-		boxMaterial.alpha = 0.95;
-		boxMaterial.alphaMode = Engine.ALPHA_PREMULTIPLIED_PORTERDUFF;
+		// boxMaterial.alpha = 0.95;
+		// boxMaterial.alphaMode = Engine.ALPHA_PREMULTIPLIED_PORTERDUFF;
 		box.material = boxMaterial;
 
 		// // Get the vertices of the box
@@ -48,9 +55,9 @@ export class NeonBox {
 		// Create a glow layer
 		const gl = new GlowLayer("glow", scene, {
 			mainTextureFixedSize: 1024,
-			blurKernelSize: 64 / 4,
+			blurKernelSize: 64,
 		});
-		gl.intensity = 0.25;
+		gl.intensity = 0.5;
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
@@ -135,7 +142,7 @@ export class NeonBox {
 			neonTube.parent = box;
 			neonTube.position = side.position;
 			neonTube.rotation = side.rotation;
-			// neonTube.material = neonMaterial;
+			neonTube.material = neonMaterial;
 			// neonTube.scaling = new Vector3(1, 1, vertex.subtract(next).length());
 			tubes.push(neonTube);
 		}
@@ -148,10 +155,48 @@ export class NeonBox {
 			false,
 			true,
 		);
+
+		this.numPerSide = 40;
+		this.size = 50;
+
+		this.setInstances();
 	}
 
-	createInstance(name: string) {
-		return this.box.createInstance(name);
+	setInstances() {
+		this.offset = this.size / (this.numPerSide - 1);
+
+		this.instanceCount = this.numPerSide * this.numPerSide * this.numPerSide;
+
+		this.matricesData = new Float32Array(16 * this.instanceCount);
+		this.colorData = new Float32Array(4 * this.instanceCount);
+
+		let m = Matrix.Identity();
+		let col = 0,
+			index = 0;
+
+		for (let x = 0; x < this.numPerSide; x++) {
+			m.addAtIndex(12, -this.size / 2 + this.offset * x);
+			for (let y = 0; y < this.numPerSide; y++) {
+				m.addAtIndex(13, -this.size / 2 + this.offset * y);
+				for (let z = 0; z < this.numPerSide; z++) {
+					m.addAtIndex(14, -this.size / 2 + this.offset * z);
+
+					m.copyToArray(this.matricesData, index * 16);
+
+					const coli = Math.floor(col);
+
+					this.colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
+					this.colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
+					this.colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
+					this.colorData[index * 4 + 3] = 1.0;
+
+					index++;
+					col += 0xffffff / this.instanceCount;
+				}
+			}
+		}
+
+		this.box.thinInstanceSetBuffer("matrix", this.matricesData, 16);
 	}
 
 	setPosition(x: number, y: number, z: number) {
@@ -161,6 +206,6 @@ export class NeonBox {
 	}
 
 	update(elapsedTime: number) {
-		// this.box.position.y = Math.sin(elapsedTime / 1000) * 0.25 + 0.75;
+		this.box.position.y = Math.sin(elapsedTime / 1000) * 0.25 + 0.75;
 	}
 }
