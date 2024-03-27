@@ -14,6 +14,7 @@ import {
 	GreasedLineMeshColorDistribution,
 	FloatArray,
 } from "@babylonjs/core";
+import { lerp } from "../math";
 
 export class SphereVisualizer {
 	ribbon: Mesh;
@@ -30,7 +31,7 @@ export class SphereVisualizer {
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
-		neonMaterial.emissiveColor = Color3.Teal(); // Green emissive color
+		neonMaterial.emissiveColor = Color3.Teal();
 		neonMaterial.disableLighting = true;
 
 		this.paths = [];
@@ -76,14 +77,36 @@ export class SphereVisualizer {
 			const phi = Math.acos(z / radius);
 
 			const newRadius = 4;
-			const newX =
-				newRadius * Math.cos(theta) * Math.sin(phi) +
-				Math.cos(x + elapsedTime / 400) * 0.25;
-			const newY =
-				newRadius * Math.sin(theta) * Math.sin(phi) +
-				Math.cos(y + elapsedTime / 200) * 0.25;
-			const newZ =
-				newRadius * Math.cos(phi) + Math.sin(z + elapsedTime / 100) * 0.25;
+			// const newX = newRadius * Math.cos(theta) * Math.sin(phi);
+			//  +Math.cos(x * 4 + elapsedTime / 400) * 0.25;
+
+			const newX = lerp(
+				x,
+				newRadius * Math.cos(x * 4 + elapsedTime / 500) * 1.5,
+				0.01,
+			);
+
+			// const newY = newRadius * Math.sin(theta) * Math.sin(phi);
+			// +Math.cos(y * 4 + elapsedTime / 200) * 0.25;
+
+			const newY = lerp(
+				y,
+				newRadius * Math.sin(y * 4 + elapsedTime / 100) * 1.5,
+				0.01,
+			);
+
+			// const newZ =
+			// 	newRadius * Math.cos(phi) +
+			// 	Math.sin(
+			// 		z * (4 * (Math.sin(elapsedTime / 2000) + 1)) + elapsedTime / 500,
+			// 	) *
+			// 		0.15;
+
+			const newZ = lerp(
+				z,
+				newRadius * Math.cos(z * 4 + elapsedTime / 50) * 1.5,
+				0.01,
+			);
 
 			vertexPosBuffer[i] = newX;
 			vertexPosBuffer[i + 1] = newY;
