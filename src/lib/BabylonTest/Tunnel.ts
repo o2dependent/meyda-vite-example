@@ -39,96 +39,32 @@ export class Tunnel {
 		neonMaterial.emissiveColor = Color3.Teal(); // Green emissive color
 		neonMaterial.disableLighting = true;
 
-		const tubePath = [
-			new Vector3(5.0, 0, 0.0),
-			new Vector3(0, 1, 0.1),
-			new Vector3(-4.0, 6, 0.2),
+		const points1 = [];
+		const colors1 = [
+			Color3.Red(),
+			Color3.Green(),
+			Color3.Blue(),
+			Color3.Yellow(),
 		];
-		const tube = MeshBuilder.CreateTube(
-			"tube",
+		for (let x = 0; x < 10; x += 0.25) {
+			points1.push(new Vector3(x, Math.cos(x / 2), 0));
+		}
+		const width = 0.3;
+
+		const line1 = CreateGreasedLine(
+			"basic-line-1",
 			{
-				path: tubePath,
-				radius: 0.5,
-				sideOrientation: Mesh.DOUBLESIDE,
-				updatable: true,
+				points: points1,
+			},
+			{
+				colors: colors1,
+				useColors: true,
+				width,
+				colorDistribution:
+					GreasedLineMeshColorDistribution.COLOR_DISTRIBUTION_START, // Default
 			},
 			scene,
 		);
-		tube.material = neonMaterial;
-		tube.scaling = new Vector3(50, 50, 50);
-
-		this.tube = tube;
-
-		// this.container = container;
-
-		const sides = [
-			{
-				edge: new Vector3(1, 1, 1),
-				position: new Vector3(1, 1, 0),
-				rotation: new Vector3(Math.PI / 2, 0, 0),
-			},
-			{
-				edge: new Vector3(1, -1, 1),
-				position: new Vector3(1, -1, 0),
-				rotation: new Vector3(Math.PI / 2, 0, 0),
-			},
-			{
-				edge: new Vector3(1, -1, -1),
-				position: new Vector3(1, 0, 1),
-				rotation: new Vector3(0, 0, 0),
-			},
-			{
-				edge: new Vector3(1, 1, -1),
-				position: new Vector3(1, 0, -1),
-				rotation: new Vector3(0, 0, 0),
-			},
-		];
-		// const tubes = [] as Mesh[];
-		// const edges = [] as Mesh[];
-		// for (let i = 0; i < sides.length; i++) {
-		// 	const side = sides[i];
-		// 	const neonTube = MeshBuilder.CreateCylinder(
-		// 		"neonTube" + i,
-		// 		{ height: 2, diameter: 0.2 },
-		// 		scene,
-		// 	);
-		// 	neonTube.position = side.position;
-		// 	neonTube.rotation = side.rotation;
-		// 	neonTube.material = neonMaterial;
-		// 	// neonTube.scaling = new Vector3(1, 1, vertex.subtract(next).length());
-		// 	tubes.push(neonTube);
-
-		// 	const edge = MeshBuilder.CreateSphere(
-		// 		"edge" + i,
-		// 		{ diameter: 0.2 },
-		// 		scene,
-		// 	);
-		// 	edge.position = side.edge;
-		// 	edge.material = neonMaterial;
-		// 	edges.push(edge);
-		// }
-
-		const tunnelLines = [
-			new Vector3(0, 0, 0),
-			new Vector3(0, 0.5, 0),
-			new Vector3(0, 1, 0),
-			new Vector3(0, 1, 0.5),
-			new Vector3(0, 1, 1),
-			new Vector3(0, 0.5, 1),
-			new Vector3(0, 0, 1),
-			new Vector3(0, 0, 0.5),
-			new Vector3(0, 0, 0),
-		];
-		const lines = MeshBuilder.CreateLines("tunnel-lines", {
-			points: tunnelLines,
-			material: neonMaterial,
-		});
-		lines.scaling = new Vector3(100, 100, 100);
-		this.lines = lines;
-
-		// this.box.scaling = new Vector3(25, 25, 25);
-
-		// this.setInstances();
 	}
 
 	setInstances(elapsedTime: number = 0) {
@@ -162,11 +98,7 @@ export class Tunnel {
 		this.lines.thinInstanceSetBuffer("matrix", this.matricesData, 16);
 	}
 
-	setPosition(x: number, y: number, z: number) {
-		this.lines.position.x = x;
-		this.lines.position.y = y;
-		this.lines.position.z = z;
-	}
+	setPosition(x: number, y: number, z: number) {}
 
 	setVertices(elapsedTime: number) {
 		const newVertices = [

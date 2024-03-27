@@ -31,7 +31,7 @@ export class BabylonTestApp {
 	engine: Engine;
 	scene: Scene;
 
-	activeNodes: ("neonBox" | "tunnel")[] = ["tunnel"];
+	activeNodes: ("neonBox" | "tunnel")[] = ["tunnel", "neonBox"];
 	cameraType: "arcRotate" | "free" = "arcRotate";
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -44,7 +44,7 @@ export class BabylonTestApp {
 				"Camera",
 				0,
 				Math.PI / 2,
-				200,
+				20,
 				Vector3.Zero(),
 				scene,
 			);
