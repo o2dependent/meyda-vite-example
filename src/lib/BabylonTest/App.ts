@@ -18,6 +18,7 @@ import {
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
 import { Tunnel } from "./Tunnel";
+import { SphereVisualizer } from "./SphereVisualizer";
 
 export class BabylonTestApp {
 	matricesData: Float32Array;
@@ -31,7 +32,9 @@ export class BabylonTestApp {
 	engine: Engine;
 	scene: Scene;
 
-	activeNodes: ("neonBox" | "tunnel")[] = ["tunnel", "neonBox"];
+	activeNodes: ("neonBox" | "tunnel" | "sphereVisualizer")[] = [
+		"sphereVisualizer",
+	];
 	cameraType: "arcRotate" | "free" = "arcRotate";
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -89,6 +92,11 @@ export class BabylonTestApp {
 			const tunnel = new Tunnel(scene);
 			tunnel.setPosition(-50, -50, -50);
 			nodes.push(tunnel);
+		}
+
+		if (this.activeNodes.includes("sphereVisualizer")) {
+			const sphereVisualizer = new SphereVisualizer(scene);
+			nodes.push(sphereVisualizer);
 		}
 
 		// this.makeBox(scene);
