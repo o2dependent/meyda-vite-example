@@ -10,6 +10,8 @@ import {
 	Engine,
 	Matrix,
 	LinesMesh,
+	CreateGreasedLine,
+	GreasedLineMeshColorDistribution,
 } from "@babylonjs/core";
 
 export class Tunnel {
@@ -19,55 +21,12 @@ export class Tunnel {
 	matricesData: Float32Array;
 	colorData: Float32Array;
 	instanceCount: number;
-	tunnelLength = 40;
+	tunnelLength = 10;
 	numSections = 2;
 	offset = this.numSections / (this.tunnelLength - 1);
-	container: Mesh;
+	tube: Mesh;
 
 	constructor(scene: Scene) {
-		// create hollow box with left and right sides missing
-		const containerRight = MeshBuilder.CreatePlane(
-			"containerRight",
-			{ size: 100 },
-			scene,
-		);
-		containerRight.position.z = 50;
-		const containerLeft = MeshBuilder.CreatePlane(
-			"containerLeft",
-			{ size: 100 },
-			scene,
-		);
-		containerLeft.position.z = -50;
-		containerLeft.rotation.y = Math.PI;
-		const containerTop = MeshBuilder.CreatePlane(
-			"containerTop",
-			{ size: 100 },
-			scene,
-		);
-		containerTop.position.y = 50;
-		containerTop.rotation.x = -Math.PI / 2;
-		const containerBottom = MeshBuilder.CreatePlane(
-			"containerBottom",
-			{ size: 100 },
-			scene,
-		);
-		containerBottom.position.y = -50;
-		containerBottom.rotation.x = Math.PI / 2;
-
-		const container = Mesh.MergeMeshes(
-			[containerRight, containerLeft, containerTop, containerBottom],
-			true,
-			false,
-			undefined,
-			false,
-			true,
-		);
-		container.scaling.x = 15;
-
-		this.container = container;
-
-		// this.container = container;
-
 		// Create a glow layer
 		const gl = new GlowLayer("glow", scene, {
 			mainTextureFixedSize: 1024,
@@ -79,6 +38,28 @@ export class Tunnel {
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
 		neonMaterial.emissiveColor = Color3.Teal(); // Green emissive color
 		neonMaterial.disableLighting = true;
+
+		const tubePath = [
+			new Vector3(5.0, 0, 0.0),
+			new Vector3(0, 1, 0.1),
+			new Vector3(-4.0, 6, 0.2),
+		];
+		const tube = MeshBuilder.CreateTube(
+			"tube",
+			{
+				path: tubePath,
+				radius: 0.5,
+				sideOrientation: Mesh.DOUBLESIDE,
+				updatable: true,
+			},
+			scene,
+		);
+		tube.material = neonMaterial;
+		tube.scaling = new Vector3(50, 50, 50);
+
+		this.tube = tube;
+
+		// this.container = container;
 
 		const sides = [
 			{
@@ -142,7 +123,7 @@ export class Tunnel {
 			points: tunnelLines,
 			material: neonMaterial,
 		});
-		lines.scaling = new Vector3(25, 25, 25);
+		lines.scaling = new Vector3(100, 100, 100);
 		this.lines = lines;
 
 		// this.box.scaling = new Vector3(25, 25, 25);
@@ -220,11 +201,11 @@ export class Tunnel {
 
 	update(elapsedTime: number) {
 		// this.lines.position.y = Math.sin(elapsedTime / 1000) * 0.25 + 0.75;
-		this.container.rotateAround(Vector3.Zero(), new Vector3(1, 0, 0), 0.01);
-
+		// this.container.rotateAround(Vector3.Zero(), new Vector3(1, 0, 0), 0.01);
+		// this.lines.rotateAround(Vector3.Zero(), new Vector3(1, 0, 0), 0.01);
 		// this.setVertices(elapsedTime);
 		// this.lines.rotation.x = elapsedTime / 1000;
 		// this.numSections = Math.abs(Math.sin(elapsedTime / 1000) * 10) + 5;
-		this.setInstances(elapsedTime);
+		// this.setInstances(elapsedTime);
 	}
 }

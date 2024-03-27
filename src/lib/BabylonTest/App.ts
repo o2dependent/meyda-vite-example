@@ -87,7 +87,7 @@ export class BabylonTestApp {
 
 		if (this.activeNodes.includes("tunnel")) {
 			const tunnel = new Tunnel(scene);
-			tunnel.setPosition(-25 / 2, -25 / 2, -25 / 2);
+			tunnel.setPosition(-50, -50, -50);
 			nodes.push(tunnel);
 		}
 
