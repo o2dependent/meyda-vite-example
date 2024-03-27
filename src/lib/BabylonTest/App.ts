@@ -112,7 +112,6 @@ export class BabylonTestApp {
 		// hide/show the Inspector
 		window.addEventListener("keydown", (ev) => {
 			// Shift+Ctrl+Alt+I
-			console.log(ev);
 			if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.code === "KeyI") {
 				if (scene.debugLayer.isVisible()) {
 					scene.debugLayer.hide();
