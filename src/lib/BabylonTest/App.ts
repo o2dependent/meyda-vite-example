@@ -134,8 +134,6 @@ export class BabylonTestApp {
 			elapsedTime += engine.getDeltaTime();
 			nodes.forEach((node) => node?.update?.(elapsedTime));
 
-			this.updateBox(elapsedTime);
-
 			scene.render();
 		});
 
@@ -149,96 +147,5 @@ export class BabylonTestApp {
 
 		this.engine = null;
 		this.scene = null;
-	}
-
-	makeBox(scene: Scene) {
-		var box = MeshBuilder.CreateBox("root", { size: 1 });
-
-		this.numPerSide = 40;
-		this.size = 2;
-		this.ofst = this.size / (this.numPerSide - 1);
-
-		this.instanceCount = this.numPerSide * this.numPerSide * this.numPerSide;
-
-		this.matricesData = new Float32Array(16 * this.instanceCount);
-		this.colorData = new Float32Array(4 * this.instanceCount);
-
-		let m = Matrix.Identity();
-		let col = 0,
-			index = 0;
-
-		for (let x = 0; x < this.numPerSide; x++) {
-			m.addAtIndex(12, -this.size / 2 + this.ofst * x);
-			for (let y = 0; y < this.numPerSide; y++) {
-				m.addAtIndex(13, -this.size / 2 + this.ofst * y);
-				for (let z = 0; z < this.numPerSide; z++) {
-					m.addAtIndex(14, -this.size / 2 + this.ofst * z);
-
-					m.copyToArray(this.matricesData, index * 16);
-
-					const coli = Math.floor(col);
-
-					this.colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
-					this.colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
-					this.colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
-					this.colorData[index * 4 + 3] = 1.0;
-
-					index++;
-					col += 0xffffff / this.instanceCount;
-				}
-			}
-		}
-
-		box.thinInstanceSetBuffer("matrix", this.matricesData, 16);
-		box.thinInstanceSetBuffer("color", this.colorData, 4);
-
-		const gl = new GlowLayer("glow", scene, {
-			mainTextureFixedSize: 1024,
-			blurKernelSize: 64,
-		});
-		gl.intensity = 0.75;
-
-		const boxMaterial = new StandardMaterial("bmaterial", scene);
-		boxMaterial.emissiveColor = Color3.Red();
-		boxMaterial.disableLighting = true;
-		box.material = boxMaterial;
-		gl.addIncludedOnlyMesh(box);
-
-		this.box = box;
-	}
-
-	updateBox(elapsedTime: number) {
-		if (!this.box) return;
-		this.size = Math.abs(Math.sin(elapsedTime / 1000) * 50);
-		this.ofst = this.size / (this.numPerSide - 1);
-
-		let m = Matrix.Identity();
-		let col = 0,
-			index = 0;
-
-		for (let x = 0; x < this.numPerSide; x++) {
-			m.addAtIndex(12, -this.size / 2 + this.ofst * x);
-			for (let y = 0; y < this.numPerSide; y++) {
-				m.addAtIndex(13, -this.size / 2 + this.ofst * y);
-				for (let z = 0; z < this.numPerSide; z++) {
-					m.addAtIndex(14, -this.size / 2 + this.ofst * z);
-
-					m.copyToArray(this.matricesData, index * 16);
-
-					const coli = Math.floor(col);
-
-					this.colorData[index * 4 + 0] = ((coli & 0xff0000) >> 16) / 255;
-					this.colorData[index * 4 + 1] = ((coli & 0xffff00) >> 8) / 255;
-					this.colorData[index * 4 + 2] = ((coli & 0x0000ff) >> 0) / 255;
-					this.colorData[index * 4 + 3] = 1.0;
-
-					index++;
-					col += 0xffffff / this.instanceCount;
-				}
-			}
-		}
-
-		this.box.thinInstanceSetBuffer("matrix", this.matricesData, 16);
-		this.box.thinInstanceSetBuffer("color", this.colorData, 4);
 	}
 }
