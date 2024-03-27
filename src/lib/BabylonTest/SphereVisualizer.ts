@@ -12,11 +12,13 @@ import {
 	LinesMesh,
 	CreateGreasedLine,
 	GreasedLineMeshColorDistribution,
+	FloatArray,
 } from "@babylonjs/core";
 
 export class SphereVisualizer {
 	ribbon: Mesh;
 	paths: Vector3[][];
+	vertexPosBuffer: FloatArray;
 
 	constructor(scene: Scene) {
 		// Create a glow layer
@@ -55,15 +57,14 @@ export class SphereVisualizer {
 
 		ribbon.rotate(Vector3.Right(), Math.PI / 2);
 
+		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
 	}
 
 	setPosition(x: number, y: number, z: number) {}
 
 	update(elapsedTime: number) {
-		const vertexPosBuffer = this.ribbon.getVerticesData(
-			VertexBuffer.PositionKind,
-		);
+		const vertexPosBuffer = [...this.vertexPosBuffer];
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
@@ -74,10 +75,15 @@ export class SphereVisualizer {
 			const theta = Math.atan2(y, x);
 			const phi = Math.acos(z / radius);
 
-			const newRadius = 4 + Math.sin(elapsedTime / 1000);
-			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
-			const newY = newRadius * Math.sin(theta) * Math.sin(phi);
-			const newZ = newRadius * Math.cos(phi);
+			const newRadius = 4;
+			const newX =
+				newRadius * Math.cos(theta) * Math.sin(phi) +
+				Math.cos(x + elapsedTime / 400) * 0.25;
+			const newY =
+				newRadius * Math.sin(theta) * Math.sin(phi) +
+				Math.cos(y + elapsedTime / 200) * 0.25;
+			const newZ =
+				newRadius * Math.cos(phi) + Math.sin(z + elapsedTime / 100) * 0.25;
 
 			vertexPosBuffer[i] = newX;
 			vertexPosBuffer[i + 1] = newY;

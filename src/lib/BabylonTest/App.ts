@@ -14,6 +14,7 @@ import {
 	VertexBuffer,
 	Matrix,
 	FreeCamera,
+	PointLight,
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
@@ -36,6 +37,8 @@ export class BabylonTestApp {
 		"sphereVisualizer",
 	];
 	cameraType: "arcRotate" | "free" = "arcRotate";
+	cameraLight: boolean = true;
+	flashLight: PointLight;
 
 	constructor(canvas: HTMLCanvasElement) {
 		// initialize babylon scene and engine
@@ -57,6 +60,15 @@ export class BabylonTestApp {
 			camera.fov = 45;
 			camera.setTarget(Vector3.Left());
 			camera.attachControl(canvas, true);
+		}
+
+		if (this.cameraLight) {
+			this.flashLight = new PointLight(
+				"flashLight",
+				new Vector3(0, 10, 0),
+				scene,
+			);
+			this.flashLight.intensity = 0.25;
 		}
 
 		const light1: HemisphericLight = new HemisphericLight(
@@ -132,6 +144,10 @@ export class BabylonTestApp {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
 			nodes.forEach((node) => node?.update?.(elapsedTime));
+
+			if (this.cameraLight) {
+				this.flashLight.position = scene.activeCamera.position;
+			}
 
 			scene.render();
 		});
