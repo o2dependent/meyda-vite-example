@@ -13,6 +13,7 @@ import {
 	GlowLayer,
 	VertexBuffer,
 	Matrix,
+	FreeCamera,
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
@@ -27,22 +28,34 @@ export class BabylonTestApp {
 	size: number;
 	ofst: number;
 
+	engine: Engine;
+	scene: Scene;
+
 	activeNodes: ("neonBox" | "tunnel")[] = ["tunnel"];
+	cameraType: "arcRotate" | "free" = "arcRotate";
 
 	constructor(canvas: HTMLCanvasElement) {
 		// initialize babylon scene and engine
 		const engine = new Engine(canvas, true);
 		const scene = new Scene(engine);
 
-		const camera: ArcRotateCamera = new ArcRotateCamera(
-			"Camera",
-			0,
-			Math.PI / 2,
-			200,
-			Vector3.Zero(),
-			scene,
-		);
-		camera.attachControl(canvas, true);
+		if (this.cameraType === "arcRotate") {
+			const camera: ArcRotateCamera = new ArcRotateCamera(
+				"Camera",
+				0,
+				Math.PI / 2,
+				200,
+				Vector3.Zero(),
+				scene,
+			);
+			camera.attachControl(canvas, true);
+		} else if (this.cameraType === "free") {
+			const camera = new FreeCamera("camera1", Vector3.Zero(), scene);
+			camera.fov = 45;
+			camera.setTarget(Vector3.Left());
+			camera.attachControl(canvas, true);
+		}
+
 		const light1: HemisphericLight = new HemisphericLight(
 			"light1",
 			new Vector3(1, 1, 0),
@@ -74,7 +87,7 @@ export class BabylonTestApp {
 
 		if (this.activeNodes.includes("tunnel")) {
 			const tunnel = new Tunnel(scene);
-			tunnel.setPosition(0, 0, 0);
+			tunnel.setPosition(-25 / 2, -25 / 2, -25 / 2);
 			nodes.push(tunnel);
 		}
 
@@ -117,6 +130,17 @@ export class BabylonTestApp {
 
 			scene.render();
 		});
+
+		this.engine = engine;
+		this.scene = scene;
+	}
+
+	dispose() {
+		this.engine.dispose();
+		this.scene.dispose();
+
+		this.engine = null;
+		this.scene = null;
 	}
 
 	makeBox(scene: Scene) {

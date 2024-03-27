@@ -10,6 +10,10 @@
 		) as HTMLCanvasElement;
 
 		app = new BabylonTestApp(canvas);
+
+		return () => {
+			app.dispose();
+		};
 	});
 </script>
 
