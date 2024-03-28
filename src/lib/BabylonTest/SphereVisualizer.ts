@@ -15,11 +15,14 @@ import {
 	FloatArray,
 } from "@babylonjs/core";
 import { lerp } from "../math";
+import type Meyda from "meyda";
 
 export class SphereVisualizer {
 	ribbon: Mesh;
 	paths: Vector3[][];
 	vertexPosBuffer: FloatArray;
+
+	analyser: Meyda.MeydaAnalyzer;
 
 	constructor(scene: Scene) {
 		// Create a glow layer
@@ -77,23 +80,23 @@ export class SphereVisualizer {
 			const phi = Math.acos(z / radius);
 
 			const newRadius = 4;
-			// const newX = newRadius * Math.cos(theta) * Math.sin(phi);
+			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
 			//  +Math.cos(x * 4 + elapsedTime / 400) * 0.25;
 
-			const newX = lerp(
-				x,
-				newRadius * Math.cos(x * 4 + elapsedTime / 500) * 1.5,
-				0.01,
-			);
+			// const newX = lerp(
+			// 	x,
+			// 	newRadius * Math.cos(x * 4 + elapsedTime / 500) * 1.5,
+			// 	0.01,
+			// );
 
-			// const newY = newRadius * Math.sin(theta) * Math.sin(phi);
+			const newY = newRadius * Math.sin(theta) * Math.sin(phi);
 			// +Math.cos(y * 4 + elapsedTime / 200) * 0.25;
 
-			const newY = lerp(
-				y,
-				newRadius * Math.sin(y * 4 + elapsedTime / 100) * 1.5,
-				0.01,
-			);
+			// const newY = lerp(
+			// 	y,
+			// 	newRadius * Math.sin(y * 4 + elapsedTime / 100) * 1.5,
+			// 	0.01,
+			// );
 
 			// const newZ =
 			// 	newRadius * Math.cos(phi) +
@@ -114,5 +117,14 @@ export class SphereVisualizer {
 		}
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
+
+		// console.log(this?.analyser?.get?.(["rms"]));
+		console.log(this?.analyser?.get?.(["chroma"]));
+		// this.ribbon.position.y =
+		// 	this?.analyser?.get?.(["rms"])?.rms ?? this.ribbon.position.y;
+	}
+
+	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
+		this.analyser = analyser;
 	}
 }

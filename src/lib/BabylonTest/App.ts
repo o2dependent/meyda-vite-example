@@ -20,6 +20,7 @@ import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
 import { Tunnel } from "./Tunnel";
 import { SphereVisualizer } from "./SphereVisualizer";
+import type Meyda from "meyda";
 
 export class BabylonTestApp {
 	matricesData: Float32Array;
@@ -30,8 +31,12 @@ export class BabylonTestApp {
 	size: number;
 	ofst: number;
 
+	nodes: any[];
+
 	engine: Engine;
 	scene: Scene;
+
+	analyser: Meyda.MeydaAnalyzer;
 
 	activeNodes: ("neonBox" | "tunnel" | "sphereVisualizer")[] = [
 		"sphereVisualizer",
@@ -85,7 +90,7 @@ export class BabylonTestApp {
 		// plane.scaling.x = 5;
 		// plane.scaling.y = 5;
 
-		const nodes = [];
+		this.nodes = [];
 		// for (let i = 0; i < 10; i++) {
 		// 	for (let j = 0; j < 10; j++) {
 		// 		const neonBox = new NeonBox(scene, i * j);
@@ -97,18 +102,18 @@ export class BabylonTestApp {
 		if (this.activeNodes.includes("neonBox")) {
 			const neonBox = new NeonBox(scene, 0);
 			neonBox.setPosition(0, 0, 0);
-			nodes.push(neonBox);
+			this.nodes.push(neonBox);
 		}
 
 		if (this.activeNodes.includes("tunnel")) {
 			const tunnel = new Tunnel(scene);
 			tunnel.setPosition(-50, -50, -50);
-			nodes.push(tunnel);
+			this.nodes.push(tunnel);
 		}
 
 		if (this.activeNodes.includes("sphereVisualizer")) {
 			const sphereVisualizer = new SphereVisualizer(scene);
-			nodes.push(sphereVisualizer);
+			this.nodes.push(sphereVisualizer);
 		}
 
 		// this.makeBox(scene);
@@ -143,7 +148,7 @@ export class BabylonTestApp {
 		engine.runRenderLoop(() => {
 			const engine = scene.getEngine();
 			elapsedTime += engine.getDeltaTime();
-			nodes.forEach((node) => node?.update?.(elapsedTime));
+			this.nodes.forEach((node) => node?.update?.(elapsedTime));
 
 			if (this.cameraLight) {
 				this.flashLight.position = scene.activeCamera.position;
@@ -154,6 +159,11 @@ export class BabylonTestApp {
 
 		this.engine = engine;
 		this.scene = scene;
+	}
+
+	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
+		this.analyser = analyser;
+		this.nodes?.forEach((node) => node?.setMedyaAnalyser?.(analyser));
 	}
 
 	dispose() {
