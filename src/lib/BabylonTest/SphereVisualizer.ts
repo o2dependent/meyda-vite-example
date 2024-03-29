@@ -32,12 +32,12 @@ export class SphereVisualizer {
 			mainTextureFixedSize: 1024,
 			blurKernelSize: 64,
 		});
-		gl.intensity = 0.35;
+		gl.intensity = 0.15;
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
 		neonMaterial.emissiveColor = Color3.Teal();
-		neonMaterial.disableLighting = true;
+		// neonMaterial.disableLighting = true;
 
 		this.paths = [];
 		const colors: Color4[] = [];
@@ -97,16 +97,12 @@ export class SphereVisualizer {
 
 	update(elapsedTime: number) {
 		const vertexPosBuffer = [...this.vertexPosBuffer];
-		console.log(this.features?.buffer);
+		console.log(this.features);
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
 			const y = vertexPosBuffer[i + 1];
 			const z = vertexPosBuffer[i + 2];
-
-			const radius = Math.sqrt(x * x + y * y + z * z);
-			const theta = Math.atan2(y, x);
-			const phi = Math.acos(z / radius);
 
 			const iPercent = i / vertexPosBuffer.length;
 			const bufferIndex = Math.floor(
@@ -119,12 +115,30 @@ export class SphereVisualizer {
 				i,
 				vertexPosBuffer.length,
 			);
+			const chromaVal = this.getInterpolatedValue(
+				this.features?.chroma,
+				i,
+				vertexPosBuffer.length,
+			);
+
+			const radius = Math.sqrt(x * x + y * y + z * z);
+			const theta = Math.atan2(y, x);
+			const phi = Math.acos(z / radius);
 			// const bufferVal =
 			// 	this.features?.complexSpectrum?.real?.[bufferIndex] || 0;
 
 			// const amp = 0.15 + (this.features?.energy || 0) / 100;
 			const amp = lerp(0.15, 1, (this.features?.energy || 0) / 100);
-			const newRadius = 4 + Math.sin(x * y * z + elapsedTime / 1000) * amp;
+			const newRadius =
+				4 +
+				Math.sin(
+					(Math.abs(x) - radius) *
+						(Math.abs(y) - radius) *
+						(Math.abs(z) - radius) +
+						elapsedTime /
+							lerp(100, 1000, (this.features?.spectralFlatness || 0) - 0),
+				) *
+					amp;
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
 			//  +Math.cos(x * 4 + elapsedTime / 400) * 0.25;
 
@@ -160,10 +174,6 @@ export class SphereVisualizer {
 			// const zVal = bufferVal * Math.sign(z) || 0;
 			// const newZ = lerp(z, z + Math.cos(phi) * 2.5, 1);
 
-			vertexPosBuffer[i] = newX;
-			vertexPosBuffer[i + 1] = newY;
-			vertexPosBuffer[i + 2] = newZ;
-			const color = new Vector3(newX, newY, newZ).normalize();
 			vertexPosBuffer[i] = newX;
 			vertexPosBuffer[i + 1] = newY;
 			vertexPosBuffer[i + 2] = newZ;
