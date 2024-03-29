@@ -37,6 +37,7 @@ export class BabylonTestApp {
 	scene: Scene;
 
 	analyser: Meyda.MeydaAnalyzer;
+	features: Record<string, any>;
 
 	activeNodes: ("neonBox" | "tunnel" | "sphereVisualizer")[] = [
 		"sphereVisualizer",
@@ -164,6 +165,11 @@ export class BabylonTestApp {
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
 		this.analyser = analyser;
 		this.nodes?.forEach((node) => node?.setMedyaAnalyser?.(analyser));
+	}
+
+	setMeydaFeatures(features: Record<string, any>) {
+		this.features = features;
+		this.nodes?.forEach((node) => node?.setMeydaFeatures?.(features));
 	}
 
 	dispose() {

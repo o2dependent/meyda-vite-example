@@ -10,7 +10,6 @@
 	let source: AudioBufferSourceNode;
 	let analyzer: Meyda.MeydaAnalyzer;
 	let features: Record<string, any> | null = null;
-	let logValue = "";
 	onMount(() => {
 		const canvas = document.getElementById(
 			"babylon-canvas",
@@ -52,12 +51,8 @@
 			] satisfies Meyda.MeydaAudioFeature[],
 			inputs: 2,
 			callback: (_features) => {
-				logValue = JSON.stringify(
-					{ ...features, complexSpectrum: "NO LOG" },
-					null,
-					2,
-				);
 				features = _features;
+				app.setMeydaFeatures(features);
 			},
 		});
 		analyzer.start();
@@ -102,6 +97,7 @@
 		source = audioContext.createBufferSource();
 		source.buffer = audioBuffer;
 		source.connect(audioContext.destination);
+		analyzer.setSource(source);
 		source.start();
 		playing = true;
 	};
