@@ -129,7 +129,7 @@ export class SphereVisualizer {
 					d = sin(d*18.)/18.;
 					d = abs(d);
 
-					d = pow(0.01 / d, 1.2);
+					d = pow(0.01 / d, 1.1);
 
 					finalColor += col * d;
 			}
@@ -212,12 +212,11 @@ export class SphereVisualizer {
 				radius +
 				Math.sin(
 					x *
-						Math.cos(chromaVal) *
+						Math.sin(chromaVal) *
 						(y * Math.sin(loudnessVal)) *
 						(z * Math.sin(bufferVal)),
 					// + elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
-				) *
-					amp;
+				);
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
 
 			const newY = newRadius * Math.sin(theta) * Math.sin(phi);
