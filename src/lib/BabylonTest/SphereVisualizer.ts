@@ -78,8 +78,9 @@ export class SphereVisualizer {
 
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
-		this.ribbon.material = this.shaderMaterial;
-		// this.ribbon.material.wireframe = true;
+		this.ribbon.material = neonMaterial;
+		// this.ribbon.material = this.shaderMaterial;
+		this.ribbon.material.wireframe = true;
 	}
 
 	addShaders() {
@@ -107,7 +108,7 @@ export class SphereVisualizer {
 
 		void main() {
 				// distance from 0,0,0
-				float dist = sin(length(vPosition.xyz * 10.));
+				float dist = length(vPosition.xyz);
 				gl_FragColor = vec4(normalize(color) * vec3(dist,dist,dist), 1.);
 		}
 `;
@@ -170,12 +171,15 @@ export class SphereVisualizer {
 			const theta = Math.atan2(y, x);
 			const phi = Math.acos(z / radius);
 
-			const amp = lerp(0.15, 1, (this.features?.energy || 0) / 100);
+			const amp = lerp(0.5, 4, (this.features?.energy || 0) / 100);
 			const newRadius =
-				4 +
+				radius +
 				Math.sin(
-					x * y * z +
-						elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
+					x *
+						Math.cos(chromaVal) *
+						(y * Math.sin(chromaVal)) *
+						(z * Math.sin(bufferVal)),
+					// + elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
 				) *
 					amp;
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
@@ -184,22 +188,17 @@ export class SphereVisualizer {
 
 			const newZ = newRadius * Math.cos(phi);
 
-			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.25);
-			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.25);
-			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.25);
+			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.1);
+			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.1);
+			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.1);
 		}
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
 
 		// three heighest chroma values
-		const chromaVals = this.features?.chroma?.sort?.()?.slice?.(-3);
 		const energy = (this.features?.energy || 0) / 100;
 
-		const shaderColor = new Color3(
-			chromaVals?.[0] || 1,
-			chromaVals?.[1] || 0,
-			chromaVals?.[2] || 1,
-		);
+		const shaderColor = new Color3(energy, energy, 1);
 		this.shaderMaterial.setColor3("color", shaderColor);
 	}
 
