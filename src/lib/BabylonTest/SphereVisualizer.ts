@@ -40,7 +40,7 @@ export class SphereVisualizer {
 			mainTextureFixedSize: 1024,
 			blurKernelSize: 64,
 		});
-		gl.intensity = 0.15;
+		gl.intensity = 0.75;
 
 		// Create neon light materials
 		const neonMaterial = new StandardMaterial("neonMaterial", scene);
@@ -108,23 +108,25 @@ export class SphereVisualizer {
 		varying vec4 vPosition;
 
 		vec3 palette( float t ) {
-			vec3 a = vec3(0.1, 0.5, 1.5);
-			vec3 b = vec3(0.5, 0.25, 0.5);
-			vec3 c = vec3(1.0, 0.75, 0.0);
-			vec3 d = vec3(0.263,0.416,0.557);
+			vec3 a = vec3(0.5, 0.5, 0.5	);
+			vec3 b = vec3(0.5, 0.5, 0.5);
+			vec3 c = vec3(1.0, 1.0, 1.0	);
+			vec3 d = vec3(0.00, 0.33, 0.67);
 
 			return a + b*cos( 6.28318*(c*t+d) );
 	}
 
 		void main() {
 			vec3 finalColor = vec3(0.0);
-
+			vec3 uv = vPosition.xyz;
+			vec3 uv0 = uv;
 			for (float i = 0.0; i < 4.0; i++) {
-					float d = length(vPosition.xyz) * exp(-length(vPosition.xyz));
+					uv = abs(uv) / dot(uv, uv);
+					float d = length(uv) * exp(-length(uv));
 
-					vec3 col = palette(length(vPosition.xyz) + i*.4 + iTime*.4);
+					vec3 col = palette(length(uv) + i*.4 );
 
-					d = sin(d*8. + iTime)/8.;
+					d = sin(d*18.)/18.;
 					d = abs(d);
 
 					d = pow(0.01 / d, 1.2);
@@ -142,6 +144,8 @@ export class SphereVisualizer {
 			attributes: ["position"],
 			uniforms: ["worldViewProjection", "color", "iTime"],
 		});
+
+		this.shaderMaterial.allowShaderHotSwapping = true;
 
 		var shaderColor = new Color3(0, 0, 0);
 		this.shaderMaterial.setColor3("color", shaderColor);
