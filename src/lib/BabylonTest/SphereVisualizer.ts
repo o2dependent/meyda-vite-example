@@ -76,12 +76,10 @@ export class SphereVisualizer {
 
 		gl.addIncludedOnlyMesh(ribbon);
 
-		// ribbon.rotate(Vector3.Right(), Math.PI / 2);
-
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
 		this.ribbon.material = this.shaderMaterial;
-		this.ribbon.material.wireframe = true;
+		// this.ribbon.material.wireframe = true;
 	}
 
 	addShaders() {
@@ -90,8 +88,13 @@ export class SphereVisualizer {
 		attribute vec3 position;
 		uniform mat4 worldViewProjection;
 
+		varying vec4 vPosition;
+
+
 		void main() {
 				vec4 p = vec4(position, 1.);
+				vPosition = p;
+
 				gl_Position = worldViewProjection * p;
 		}
 `;
@@ -100,8 +103,12 @@ export class SphereVisualizer {
 		precision highp float;
 		uniform vec3 color;
 
+		varying vec4 vPosition;
+
 		void main() {
-				gl_FragColor = vec4(color, 1.);
+				// distance from 0,0,0
+				float dist = sin(length(vPosition.xyz * 10.));
+				gl_FragColor = vec4(normalize(color) * vec3(dist,dist,dist), 1.);
 		}
 `;
 	}
@@ -125,15 +132,7 @@ export class SphereVisualizer {
 		const val = arr?.[arrIndex] || 0;
 		const nextVal = arr?.[arrIndex + 1] || 0;
 		const interpolatedVal = lerp(val, nextVal, remainder);
-		// if (index > 5 && index < 10)
-		// 	console.log({
-		// 		iPercent,
-		// 		arrIndex,
-		// 		remainder,
-		// 		val,
-		// 		nextVal,
-		// 		interpolatedVal,
-		// 	});
+
 		return interpolatedVal;
 	}
 
@@ -154,7 +153,6 @@ export class SphereVisualizer {
 				iPercent * (this.features?.buffer?.length || 0),
 				// iPercent * (this.features?.complexSpectrum?.real?.length || 0),
 			);
-			// const bufferVal = this.features?.buffer?.[bufferIndex] || 0;
 			const bufferVal =
 				this.getInterpolatedValue(
 					this.features?.buffer,
@@ -171,10 +169,7 @@ export class SphereVisualizer {
 			const radius = Math.sqrt(x * x + y * y + z * z);
 			const theta = Math.atan2(y, x);
 			const phi = Math.acos(z / radius);
-			// const bufferVal =
-			// 	this.features?.complexSpectrum?.real?.[bufferIndex] || 0;
 
-			// const amp = 0.15 + (this.features?.energy || 0) / 100;
 			const amp = lerp(0.15, 1, (this.features?.energy || 0) / 100);
 			const newRadius =
 				4 +
@@ -185,53 +180,25 @@ export class SphereVisualizer {
 					amp;
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
 
-			// const xVal = bufferVal * Math.sign(x) || 0;
-			// const newX = x + xVal;
-			// const newX = lerp(x, x + Math.cos(theta) * Math.sin(phi) * 2.5, 1);
-			// const newX = x;
-
 			const newY = newRadius * Math.sin(theta) * Math.sin(phi);
-			// +Math.cos(y * 4 + elapsedTime / 200) * 0.25;
-
-			// const newY = lerp(
-			// 	y,
-			// 	newRadius * Math.sin(y * 4 + elapsedTime / 100) * amp,
-			// 	0.01,
-			// );
-
-			// const yVal = bufferVal * Math.sign(y) || 0;
-			// const newY = lerp(y, y + Math.sin(theta) * Math.sin(phi) * 2.5, 1);
-			// const newY = y + yVal;
 
 			const newZ = newRadius * Math.cos(phi);
-			// 	+ Math.sin(
-			// 		z * (4 * (Math.sin(elapsedTime / 2000) + 1)) + elapsedTime / 500,
-			// 	) *
-			// 		0.15;
-
-			// const newZ = lerp(
-			// 	z,
-			// 	newRadius * Math.cos(z * 4 + elapsedTime / 50) * amp,
-			// 	0.01,
-			// );
-			// const zVal = bufferVal * Math.sign(z) || 0;
-			// const newZ = lerp(z, z + Math.cos(phi) * 2.5, 1);
 
 			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.25);
 			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.25);
 			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.25);
-
-			// vertexPosBuffer[i] = newX;
-			// vertexPosBuffer[i + 1] = newY;
-			// vertexPosBuffer[i + 2] = newZ;
 		}
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
 
+		// three heighest chroma values
+		const chromaVals = this.features?.chroma?.sort?.()?.slice?.(-3);
+		const energy = (this.features?.energy || 0) / 100;
+
 		const shaderColor = new Color3(
-			Math.sin(this.features?.perceptualSharpness ?? 1),
-			Math.cos(this.features?.perceptualSpread ?? 1),
-			Math.sin(this.features?.zcr ?? 1),
+			chromaVals?.[0] || 1,
+			chromaVals?.[1] || 0,
+			chromaVals?.[2] || 1,
 		);
 		this.shaderMaterial.setColor3("color", shaderColor);
 	}
