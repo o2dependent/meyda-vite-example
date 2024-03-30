@@ -78,9 +78,9 @@ export class SphereVisualizer {
 
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
-		this.ribbon.material = neonMaterial;
-		// this.ribbon.material = this.shaderMaterial;
-		this.ribbon.material.wireframe = true;
+		// this.ribbon.material = neonMaterial;
+		this.ribbon.material = this.shaderMaterial;
+		// this.ribbon.material.wireframe = true;
 	}
 
 	addShaders() {
@@ -103,13 +103,36 @@ export class SphereVisualizer {
 		Effect.ShadersStore["customFragmentShader"] = `
 		precision highp float;
 		uniform vec3 color;
+		uniform float iTime;
 
 		varying vec4 vPosition;
 
+		vec3 palette( float t ) {
+			vec3 a = vec3(0.1, 0.5, 1.5);
+			vec3 b = vec3(0.5, 0.25, 0.5);
+			vec3 c = vec3(1.0, 0.75, 0.0);
+			vec3 d = vec3(0.263,0.416,0.557);
+
+			return a + b*cos( 6.28318*(c*t+d) );
+	}
+
 		void main() {
-				// distance from 0,0,0
-				float dist = length(vPosition.xyz);
-				gl_FragColor = vec4(normalize(color) * vec3(dist,dist,dist), 1.);
+			vec3 finalColor = vec3(0.0);
+
+			for (float i = 0.0; i < 4.0; i++) {
+					float d = length(vPosition.xyz) * exp(-length(vPosition.xyz));
+
+					vec3 col = palette(length(vPosition.xyz) + i*.4 + iTime*.4);
+
+					d = sin(d*8. + iTime)/8.;
+					d = abs(d);
+
+					d = pow(0.01 / d, 1.2);
+
+					finalColor += col * d;
+			}
+
+			gl_FragColor = vec4(finalColor, 1.0);
 		}
 `;
 	}
@@ -117,11 +140,15 @@ export class SphereVisualizer {
 	setShaderMaterial() {
 		this.shaderMaterial = new ShaderMaterial("custom", this.scene, "custom", {
 			attributes: ["position"],
-			uniforms: ["worldViewProjection", "color"],
+			uniforms: ["worldViewProjection", "color", "iTime"],
 		});
 
 		var shaderColor = new Color3(0, 0, 0);
 		this.shaderMaterial.setColor3("color", shaderColor);
+		this.shaderMaterial.setFloat(
+			"iTime",
+			this.scene.getEngine().getDeltaTime() / 1000,
+		); // Convert to seconds
 	}
 
 	setPosition(x: number, y: number, z: number) {}
@@ -166,6 +193,11 @@ export class SphereVisualizer {
 					i,
 					vertexPosBuffer.length,
 				) || 0;
+			const loudnessVal = this.getInterpolatedValue(
+				this.features?.loudness?.specific,
+				i,
+				vertexPosBuffer.length,
+			);
 
 			const radius = Math.sqrt(x * x + y * y + z * z);
 			const theta = Math.atan2(y, x);
@@ -177,7 +209,7 @@ export class SphereVisualizer {
 				Math.sin(
 					x *
 						Math.cos(chromaVal) *
-						(y * Math.sin(chromaVal)) *
+						(y * Math.sin(loudnessVal)) *
 						(z * Math.sin(bufferVal)),
 					// + elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
 				) *
@@ -200,6 +232,8 @@ export class SphereVisualizer {
 
 		const shaderColor = new Color3(energy, energy, 1);
 		this.shaderMaterial.setColor3("color", shaderColor);
+
+		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
