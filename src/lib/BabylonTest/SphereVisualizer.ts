@@ -14,11 +14,15 @@ import {
 	GreasedLineMeshColorDistribution,
 	FloatArray,
 	Color4,
+	Effect,
+	ShaderMaterial,
 } from "@babylonjs/core";
 import { lerp } from "../math";
 import type Meyda from "meyda";
 
 export class SphereVisualizer {
+	scene: Scene;
+	shaderMaterial: ShaderMaterial;
 	ribbon: Mesh;
 	paths: Vector3[][];
 	vertexPosBuffer: FloatArray;
@@ -27,6 +31,10 @@ export class SphereVisualizer {
 	features: Record<string, any>;
 
 	constructor(scene: Scene) {
+		this.scene = scene;
+		this.addShaders();
+		this.setShaderMaterial();
+
 		// Create a glow layer
 		const gl = new GlowLayer("glow", scene, {
 			mainTextureFixedSize: 1024,
@@ -60,11 +68,11 @@ export class SphereVisualizer {
 		const ribbon = MeshBuilder.CreateRibbon("ribbon", {
 			pathArray: this.paths,
 			closePath: true,
-			sideOrientation: Mesh.DOUBLESIDE,
+			// sideOrientation: Mesh.DOUBLESIDE,
+			sideOrientation: Mesh.FLIP_TILE,
 			updatable: true,
 		});
-		ribbon.material = neonMaterial;
-		ribbon.material.wireframe = true;
+		// ribbon.material = neonMaterial;
 
 		gl.addIncludedOnlyMesh(ribbon);
 
@@ -72,6 +80,40 @@ export class SphereVisualizer {
 
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
+		this.ribbon.material = this.shaderMaterial;
+		this.ribbon.material.wireframe = true;
+	}
+
+	addShaders() {
+		Effect.ShadersStore["customVertexShader"] = `
+		precision highp float;
+		attribute vec3 position;
+		uniform mat4 worldViewProjection;
+
+		void main() {
+				vec4 p = vec4(position, 1.);
+				gl_Position = worldViewProjection * p;
+		}
+`;
+
+		Effect.ShadersStore["customFragmentShader"] = `
+		precision highp float;
+		uniform vec3 color;
+
+		void main() {
+				gl_FragColor = vec4(color, 1.);
+		}
+`;
+	}
+
+	setShaderMaterial() {
+		this.shaderMaterial = new ShaderMaterial("custom", this.scene, "custom", {
+			attributes: ["position"],
+			uniforms: ["worldViewProjection", "color"],
+		});
+
+		var shaderColor = new Color3(0, 0, 0);
+		this.shaderMaterial.setColor3("color", shaderColor);
 	}
 
 	setPosition(x: number, y: number, z: number) {}
@@ -92,11 +134,14 @@ export class SphereVisualizer {
 		// 		nextVal,
 		// 		interpolatedVal,
 		// 	});
-		return val;
+		return interpolatedVal;
 	}
 
 	update(elapsedTime: number) {
 		const vertexPosBuffer = [...this.vertexPosBuffer];
+		const curVertPosBuf = this.ribbon.getVerticesData(
+			VertexBuffer.PositionKind,
+		);
 		console.log(this.features);
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
@@ -110,16 +155,18 @@ export class SphereVisualizer {
 				// iPercent * (this.features?.complexSpectrum?.real?.length || 0),
 			);
 			// const bufferVal = this.features?.buffer?.[bufferIndex] || 0;
-			const bufferVal = this.getInterpolatedValue(
-				this.features?.buffer,
-				i,
-				vertexPosBuffer.length,
-			);
-			const chromaVal = this.getInterpolatedValue(
-				this.features?.chroma,
-				i,
-				vertexPosBuffer.length,
-			);
+			const bufferVal =
+				this.getInterpolatedValue(
+					this.features?.buffer,
+					i,
+					vertexPosBuffer.length,
+				) || 1;
+			const chromaVal =
+				this.getInterpolatedValue(
+					this.features?.chroma,
+					i,
+					vertexPosBuffer.length,
+				) || 0;
 
 			const radius = Math.sqrt(x * x + y * y + z * z);
 			const theta = Math.atan2(y, x);
@@ -132,15 +179,11 @@ export class SphereVisualizer {
 			const newRadius =
 				4 +
 				Math.sin(
-					(Math.abs(x) - radius) *
-						(Math.abs(y) - radius) *
-						(Math.abs(z) - radius) +
-						elapsedTime /
-							lerp(100, 1000, (this.features?.spectralFlatness || 0) - 0),
+					x * y * z +
+						elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
 				) *
 					amp;
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
-			//  +Math.cos(x * 4 + elapsedTime / 400) * 0.25;
 
 			// const xVal = bufferVal * Math.sign(x) || 0;
 			// const newX = x + xVal;
@@ -174,20 +217,23 @@ export class SphereVisualizer {
 			// const zVal = bufferVal * Math.sign(z) || 0;
 			// const newZ = lerp(z, z + Math.cos(phi) * 2.5, 1);
 
-			vertexPosBuffer[i] = newX;
-			vertexPosBuffer[i + 1] = newY;
-			vertexPosBuffer[i + 2] = newZ;
+			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.25);
+			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.25);
+			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.25);
+
+			// vertexPosBuffer[i] = newX;
+			// vertexPosBuffer[i + 1] = newY;
+			// vertexPosBuffer[i + 2] = newZ;
 		}
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
-		// this.ribbon.updateVerticesData(
-		// 	VertexBuffer.ColorInstanceKind,
-		// 	vertexPosBuffer,
-		// );
 
-		// console.log(this?.analyser?.get?.(["rms"]));
-		// this.ribbon.position.y =
-		// 	this?.analyser?.get?.(["rms"])?.rms ?? this.ribbon.position.y;
+		const shaderColor = new Color3(
+			Math.sin(this.features?.perceptualSharpness ?? 1),
+			Math.cos(this.features?.perceptualSpread ?? 1),
+			Math.sin(this.features?.zcr ?? 1),
+		);
+		this.shaderMaterial.setColor3("color", shaderColor);
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
