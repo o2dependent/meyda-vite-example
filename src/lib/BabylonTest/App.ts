@@ -15,6 +15,8 @@ import {
 	Matrix,
 	FreeCamera,
 	PointLight,
+	Vector2,
+	Color4,
 } from "@babylonjs/core";
 import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
@@ -35,6 +37,7 @@ export class BabylonTestApp {
 
 	engine: Engine;
 	scene: Scene;
+	camera: ArcRotateCamera | FreeCamera;
 
 	analyser: Meyda.MeydaAnalyzer;
 	features: Record<string, any>;
@@ -51,8 +54,10 @@ export class BabylonTestApp {
 		const engine = new Engine(canvas, true);
 		const scene = new Scene(engine);
 
+		scene.clearColor = new Color4(0, 0, 0, 1);
+
 		if (this.cameraType === "arcRotate") {
-			const camera: ArcRotateCamera = new ArcRotateCamera(
+			this.camera = new ArcRotateCamera(
 				"Camera",
 				0,
 				Math.PI / 2,
@@ -60,12 +65,12 @@ export class BabylonTestApp {
 				Vector3.Zero(),
 				scene,
 			);
-			camera.attachControl(canvas, true);
+			this.camera.attachControl(canvas, true);
 		} else if (this.cameraType === "free") {
-			const camera = new FreeCamera("camera1", Vector3.Zero(), scene);
-			camera.fov = 45;
-			camera.setTarget(Vector3.Left());
-			camera.attachControl(canvas, true);
+			this.camera = new FreeCamera("camera1", Vector3.Zero(), scene);
+			this.camera.fov = 45;
+			this.camera.setTarget(Vector3.Left());
+			this.camera.attachControl(canvas, true);
 		}
 
 		if (this.cameraLight) {
