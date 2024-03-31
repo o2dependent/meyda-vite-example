@@ -102,18 +102,17 @@ export class SphereVisualizer {
 
 		Effect.ShadersStore["customFragmentShader"] = `
 		precision highp float;
-		uniform vec3 color;
+		uniform vec3 colorA;
+		uniform vec3 colorB;
+		uniform vec3 colorC;
+		uniform vec3 colorD;
 		uniform float iTime;
 
 		varying vec4 vPosition;
 
 		vec3 palette( float t ) {
-			vec3 a = vec3(0.5, 0.5, 0.5	);
-			vec3 b = vec3(0.5, 0.5, 0.5);
-			vec3 c = vec3(1.0, 1.0, 1.0	);
-			vec3 d = vec3(0.00, 0.33, 0.67);
 
-			return a + b*cos( 6.28318*(c*t+d) );
+			return colorA + colorB*cos( 6.28318*(colorC*t+colorD) );
 	}
 
 		void main() {
@@ -142,13 +141,22 @@ export class SphereVisualizer {
 	setShaderMaterial() {
 		this.shaderMaterial = new ShaderMaterial("custom", this.scene, "custom", {
 			attributes: ["position"],
-			uniforms: ["worldViewProjection", "color", "iTime"],
+			uniforms: [
+				"worldViewProjection",
+				"colorA",
+				"colorB",
+				"colorC",
+				"colorD",
+				"iTime",
+			],
 		});
 
 		this.shaderMaterial.allowShaderHotSwapping = true;
 
-		var shaderColor = new Color3(0, 0, 0);
-		this.shaderMaterial.setColor3("color", shaderColor);
+		this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
+		this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
+		this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
+		this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.33, 0.67));
 		this.shaderMaterial.setFloat(
 			"iTime",
 			this.scene.getEngine().getDeltaTime() / 1000,
@@ -202,21 +210,29 @@ export class SphereVisualizer {
 				i,
 				vertexPosBuffer.length,
 			);
+			const epsilon = 0.0001; // small constant
 
-			const radius = Math.sqrt(x * x + y * y + z * z);
-			const theta = Math.atan2(y, x);
-			const phi = Math.acos(z / radius);
-
+			const radius = Math.sqrt(
+				(x + epsilon) * (x + epsilon) +
+					(y + epsilon) * (y + epsilon) +
+					(z + epsilon) * (z + epsilon),
+			);
+			const theta = Math.atan2(y + epsilon, x + epsilon);
+			const phi = Math.acos((z + epsilon) / radius);
 			const amp = lerp(0.5, 4, (this.features?.energy || 0) / 100);
+
 			const newRadius =
 				radius +
-				Math.sin(
-					x *
+				(Math.sin(
+					(x + epsilon) *
 						Math.sin(chromaVal) *
-						(y * Math.sin(loudnessVal)) *
-						(z * Math.sin(bufferVal)),
+						((y + epsilon) * Math.sin(loudnessVal)) *
+						((z + epsilon) * Math.sin(bufferVal)),
 					// + elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
-				);
+				) +
+					1) *
+					amp;
+
 			const newX = newRadius * Math.cos(theta) * Math.sin(phi);
 
 			const newY = newRadius * Math.sin(theta) * Math.sin(phi);
@@ -228,13 +244,17 @@ export class SphereVisualizer {
 			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.1);
 		}
 
+		const energy = (this.features?.energy || 0) / 100;
+		const rmsPercent = (this.features?.rms || 0) / 100;
+		const spectralCentroidPercent =
+			(this.features?.spectralCentroid || 0) / 100;
+
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
 
-		// three heighest chroma values
-		const energy = (this.features?.energy || 0) / 100;
-
-		const shaderColor = new Color3(energy, energy, 1);
-		this.shaderMaterial.setColor3("color", shaderColor);
+		this.ribbon.rotate(
+			new Vector3(spectralCentroidPercent, rmsPercent, 1),
+			0.05,
+		);
 
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 	}
