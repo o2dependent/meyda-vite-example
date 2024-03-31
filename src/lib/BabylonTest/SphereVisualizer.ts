@@ -16,6 +16,9 @@ import {
 	Color4,
 	Effect,
 	ShaderMaterial,
+	ParticleSystem,
+	Texture,
+	MeshParticleEmitter,
 } from "@babylonjs/core";
 import { lerp } from "../math";
 import type Meyda from "meyda";
@@ -26,6 +29,7 @@ export class SphereVisualizer {
 	ribbon: Mesh;
 	paths: Vector3[][];
 	vertexPosBuffer: FloatArray;
+	particleSystem: ParticleSystem;
 
 	analyser: Meyda.MeydaAnalyzer;
 	features: Record<string, any>;
@@ -81,10 +85,12 @@ export class SphereVisualizer {
 		// this.ribbon.material = neonMaterial;
 		this.ribbon.material = this.shaderMaterial;
 		// this.ribbon.material.wireframe = true;
+
+		this.setParticleSystem();
 	}
 
 	addShaders() {
-		Effect.ShadersStore["customVertexShader"] = `
+		Effect.ShadersStore["sphereVisualizerVertexShader"] = `
 		precision highp float;
 		attribute vec3 position;
 		uniform mat4 worldViewProjection;
@@ -100,7 +106,7 @@ export class SphereVisualizer {
 		}
 `;
 
-		Effect.ShadersStore["customFragmentShader"] = `
+		Effect.ShadersStore["sphereVisualizerFragmentShader"] = `
 		precision highp float;
 		uniform vec3 colorA;
 		uniform vec3 colorB;
@@ -139,17 +145,22 @@ export class SphereVisualizer {
 	}
 
 	setShaderMaterial() {
-		this.shaderMaterial = new ShaderMaterial("custom", this.scene, "custom", {
-			attributes: ["position"],
-			uniforms: [
-				"worldViewProjection",
-				"colorA",
-				"colorB",
-				"colorC",
-				"colorD",
-				"iTime",
-			],
-		});
+		this.shaderMaterial = new ShaderMaterial(
+			"sphereVisualizer",
+			this.scene,
+			"sphereVisualizer",
+			{
+				attributes: ["position"],
+				uniforms: [
+					"worldViewProjection",
+					"colorA",
+					"colorB",
+					"colorC",
+					"colorD",
+					"iTime",
+				],
+			},
+		);
 
 		this.shaderMaterial.allowShaderHotSwapping = true;
 
@@ -174,6 +185,82 @@ export class SphereVisualizer {
 		const interpolatedVal = lerp(val, nextVal, remainder);
 
 		return interpolatedVal;
+	}
+
+	createSystem(color: Color4, type: number, name: string) {
+		const particleSystem1 = new ParticleSystem(name, 2000, this.scene);
+
+		//Texture of each particle
+		particleSystem1.particleTexture = new Texture(
+			"/textures/flare.png",
+			this.scene,
+		);
+		if (type === 0) {
+			particleSystem1.createConeEmitter(2);
+		} else if (type === 1) {
+			particleSystem1.createSphereEmitter(2);
+		}
+
+		// Colors of all particles
+		particleSystem1.color1 = color;
+		particleSystem1.color2 = color;
+		particleSystem1.colorDead = new Color4(0, 0, 0.2, 0.0);
+
+		particleSystem1.subEmitters = [];
+		particleSystem1.minSize = 0.1;
+		particleSystem1.maxSize = 0.5;
+		particleSystem1.minLifeTime = 0.3;
+		particleSystem1.maxLifeTime = 0.5;
+		particleSystem1.manualEmitCount = 50;
+		particleSystem1.disposeOnStop = true;
+		particleSystem1.blendMode = ParticleSystem.BLENDMODE_ONEONE;
+		particleSystem1.minAngularSpeed = 0;
+		particleSystem1.maxAngularSpeed = Math.PI;
+		particleSystem1.minEmitPower = 5;
+		particleSystem1.maxEmitPower = 6;
+		particleSystem1.updateSpeed = 0.005;
+		return particleSystem1;
+	}
+
+	setParticleSystem() {
+		// Create a particle system
+		const engine = this.scene.getEngine();
+
+		this.particleSystem = new ParticleSystem("particles", 10000, this.scene);
+		this.particleSystem.particleTexture = new Texture(
+			"/textures/flare.png",
+			this.scene,
+		);
+
+		this.particleSystem.minSize = 0.125;
+		this.particleSystem.maxSize = 0.25;
+
+		// Where the particles come from
+		var meshEmitter = new MeshParticleEmitter(this.ribbon);
+		this.particleSystem.particleEmitterType = meshEmitter;
+
+		this.particleSystem.emitter = this.ribbon;
+
+		// Life time of each particle (random between...
+		this.particleSystem.minLifeTime = 2.0;
+		this.particleSystem.maxLifeTime = 3.0;
+
+		// Emission rate
+		this.particleSystem.emitRate = 500;
+
+		// Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
+		this.particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
+
+		// Set the gravity of all particles
+		this.particleSystem.gravity = new Vector3(0, -5, 0);
+
+		// Speed
+		this.particleSystem.minEmitPower = 1;
+		this.particleSystem.maxEmitPower = 10;
+		this.particleSystem.updateSpeed = 1 / 60;
+
+		// Start the particle system
+		this.particleSystem.start();
 	}
 
 	update(elapsedTime: number) {
@@ -257,6 +344,8 @@ export class SphereVisualizer {
 		);
 
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
+
+		this.particleSystem.emitRate = 1000 * energy;
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
