@@ -113,6 +113,8 @@ export class SphereVisualizer {
 		uniform vec3 colorC;
 		uniform vec3 colorD;
 		uniform float iTime;
+		uniform float uScaleFactor;
+		uniform float uDivisorFactor;
 
 		varying vec4 vPosition;
 
@@ -131,7 +133,7 @@ export class SphereVisualizer {
 
 					vec3 col = palette(length(uv) + i*.4 );
 
-					d = sin(d*18.)/18.;
+					d = sin(d*uScaleFactor)/uDivisorFactor;
 					d = abs(d);
 
 					d = pow(0.01 / d, 1.1);
@@ -158,16 +160,32 @@ export class SphereVisualizer {
 					"colorC",
 					"colorD",
 					"iTime",
+					"uScaleFactor",
+					"uDivisorFactor",
 				],
 			},
 		);
 
 		this.shaderMaterial.allowShaderHotSwapping = true;
 
-		this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
-		this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
-		this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
-		this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.33, 0.67));
+		// this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
+		// this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
+		// this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
+		// this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.33, 0.67));
+
+		// this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
+		// this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
+		// this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
+		// this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.1, 0.2));
+
+		this.shaderMaterial.setColor3("colorA", new Color3(1, 0.1, 0.21));
+		this.shaderMaterial.setColor3("colorB", new Color3(1, 0.56, 0.1));
+		this.shaderMaterial.setColor3("colorC", new Color3(1, 0.2, 0.1));
+		this.shaderMaterial.setColor3("colorD", new Color3(0.1, 0.1, 0.1));
+
+		this.shaderMaterial.setFloat("uScaleFactor", 18);
+		this.shaderMaterial.setFloat("uDivisorFactor", 18);
+
 		this.shaderMaterial.setFloat(
 			"iTime",
 			this.scene.getEngine().getDeltaTime() / 1000,
@@ -237,13 +255,14 @@ export class SphereVisualizer {
 
 		// Where the particles come from
 		var meshEmitter = new MeshParticleEmitter(this.ribbon);
+		meshEmitter.useMeshNormalsForDirection = true;
 		this.particleSystem.particleEmitterType = meshEmitter;
 
 		this.particleSystem.emitter = this.ribbon;
 
 		// Life time of each particle (random between...
-		this.particleSystem.minLifeTime = 2.0;
-		this.particleSystem.maxLifeTime = 3.0;
+		this.particleSystem.minLifeTime = 0.25;
+		this.particleSystem.maxLifeTime = 1.5;
 
 		// Emission rate
 		this.particleSystem.emitRate = 500;
@@ -252,12 +271,12 @@ export class SphereVisualizer {
 		this.particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
 		// Set the gravity of all particles
-		this.particleSystem.gravity = new Vector3(0, -5, 0);
+		this.particleSystem.gravity = new Vector3(0, -50, 0);
 
 		// Speed
-		this.particleSystem.minEmitPower = 1;
-		this.particleSystem.maxEmitPower = 10;
-		this.particleSystem.updateSpeed = 1 / 60;
+		this.particleSystem.minEmitPower = 10;
+		this.particleSystem.maxEmitPower = 100;
+		// this.particleSystem.updateSpeed = 1 / 120;
 
 		// Start the particle system
 		this.particleSystem.start();
@@ -312,9 +331,9 @@ export class SphereVisualizer {
 				radius +
 				(Math.sin(
 					(x + epsilon) *
-						Math.sin(chromaVal) *
+						Math.sin(bufferVal) *
 						((y + epsilon) * Math.sin(loudnessVal)) *
-						((z + epsilon) * Math.sin(bufferVal)),
+						((z + epsilon) * Math.sin(chromaVal)),
 					// + elapsedTime / lerp(100, 1000, this.features?.spectralFlatness || 0),
 				) +
 					1) *
