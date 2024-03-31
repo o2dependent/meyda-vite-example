@@ -112,8 +112,15 @@
 	const togglePlay = () => (playing ? stopAudio() : playAudio());
 </script>
 
-<div style="width: 100%; position: fixed; top: 0; left-0;">
-	<input type="file" accept=".mp3, .mp4" on:change={handleFileChange} />
+<div
+	style="width: 100%; position: fixed; bottom: 0; left: 0; display: flex; justify-content: center; padding: 0.25rem;"
+>
+	<input
+		style="width: 10rem;"
+		type="file"
+		accept=".mp3, .mp4"
+		on:change={handleFileChange}
+	/>
 </div>
 <canvas
 	on:click={togglePlay}
