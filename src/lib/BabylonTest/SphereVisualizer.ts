@@ -250,6 +250,11 @@ export class SphereVisualizer {
 			this.scene,
 		);
 
+		// Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
+		this.particleSystem.blendMode = ParticleSystem.BLENDMODE_ONEONE;
+
+		this.particleSystem.customShader = this.shaderMaterial;
+
 		this.particleSystem.minSize = 0.125;
 		this.particleSystem.maxSize = 0.25;
 
@@ -267,11 +272,8 @@ export class SphereVisualizer {
 		// Emission rate
 		this.particleSystem.emitRate = 500;
 
-		// Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
-		this.particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-
 		// Set the gravity of all particles
-		this.particleSystem.gravity = new Vector3(0, -50, 0);
+		this.particleSystem.gravity = new Vector3(0, -100, 0);
 
 		// Speed
 		this.particleSystem.minEmitPower = 10;
