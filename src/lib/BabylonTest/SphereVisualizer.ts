@@ -370,6 +370,9 @@ export class SphereVisualizer {
 		this.particleSystem.minEmitPower = 10 * energy;
 		this.particleSystem.maxEmitPower = 100 * energy;
 
+		this.shaderMaterial.setFloat("uScaleFactor", 18 - 18 * energy);
+		this.shaderMaterial.setFloat("uDivisorFactor", 18 - 18 * energy);
+
 		// this.ribbon.material.wireframe = rmsPercent > 0.5;
 	}
 
