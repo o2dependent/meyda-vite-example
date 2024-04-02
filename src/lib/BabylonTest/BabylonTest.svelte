@@ -18,6 +18,8 @@
 		app = new BabylonTestApp(canvas);
 		audioContext = new AudioContext();
 
+		handleRemoteAudio("/audio/kthx - tothawall.mp3");
+
 		return () => {
 			app.dispose();
 		};
@@ -119,6 +121,13 @@
 </script>
 
 <div class="fixed bottom-0 left-0 p-2 flex justify-center items-center">
+	<button
+		class="bg-blue-50"
+		type="button"
+		on:click={() => handleRemoteAudio("/audio/kthx - tothawall.mp3")}
+	>
+		kthx - tothawall.mp3
+	</button>
 	<button
 		class="bg-blue-50"
 		type="button"
