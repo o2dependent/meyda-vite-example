@@ -367,6 +367,10 @@ export class SphereVisualizer {
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 
 		this.particleSystem.emitRate = 1000 * energy;
+		this.particleSystem.minEmitPower = 10 * energy;
+		this.particleSystem.maxEmitPower = 100 * energy;
+
+		this.ribbon.material.wireframe = rmsPercent > 0.5;
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {

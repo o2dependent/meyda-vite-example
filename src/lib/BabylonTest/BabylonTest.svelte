@@ -88,6 +88,12 @@
 		}
 	};
 
+	const handleRemoteAudio = async (url) => {
+		const res = await fetch(url);
+		const buffer = await res.arrayBuffer();
+		loadAudioBuffer(buffer).then(setAnalyzer);
+	};
+
 	let playing = false;
 
 	const playAudio = () => {
@@ -112,9 +118,15 @@
 	const togglePlay = () => (playing ? stopAudio() : playAudio());
 </script>
 
-<div
-	style="width: 100%; position: fixed; bottom: 0; left: 0; display: flex; justify-content: center; padding: 0.25rem;"
->
+<div class="fixed bottom-0 left-0 p-2 flex justify-center items-center">
+	<button
+		class="bg-blue-50"
+		type="button"
+		on:click={() =>
+			handleRemoteAudio("/audio/Enzuna: Stepa K - Shadow (Enzuna Remix).mp3")}
+	>
+		Enzuna: Stepa K - Shadow (Enzuna Remix)
+	</button>
 	<input
 		style="width: 10rem;"
 		type="file"
