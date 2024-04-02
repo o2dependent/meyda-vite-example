@@ -18,7 +18,6 @@ import {
 	Vector2,
 	Color4,
 } from "@babylonjs/core";
-import { Eye } from "./Eye";
 import { NeonBox } from "./NeonBox";
 import { Tunnel } from "./Tunnel";
 import { SphereVisualizer } from "./SphereVisualizer";

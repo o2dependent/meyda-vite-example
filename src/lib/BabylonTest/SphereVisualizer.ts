@@ -22,6 +22,8 @@ import {
 } from "@babylonjs/core";
 import { lerp } from "../math";
 import type Meyda from "meyda";
+import { getInterpolatedValue } from "../getInterpolatedValue";
+import { SphereOrbit } from "./SphereOrbit";
 
 export class SphereVisualizer {
 	scene: Scene;
@@ -30,6 +32,7 @@ export class SphereVisualizer {
 	paths: Vector3[][];
 	vertexPosBuffer: FloatArray;
 	particleSystem: ParticleSystem;
+	sphereOrbit: SphereOrbit;
 
 	analyser: Meyda.MeydaAnalyzer;
 	features: Record<string, any>;
@@ -87,6 +90,8 @@ export class SphereVisualizer {
 		// this.ribbon.material.wireframe = true;
 
 		this.setParticleSystem();
+
+		this.sphereOrbit = new SphereOrbit(scene);
 	}
 
 	addShaders() {
@@ -194,17 +199,6 @@ export class SphereVisualizer {
 
 	setPosition(x: number, y: number, z: number) {}
 
-	getInterpolatedValue(arr: number[], index: number, length: number) {
-		const iPercent = index / length;
-		const arrIndex = Math.floor(iPercent * (arr?.length || 0));
-		const remainder = iPercent * (arr?.length || 0) - arrIndex;
-		const val = arr?.[arrIndex] || 0;
-		const nextVal = arr?.[arrIndex + 1] || 0;
-		const interpolatedVal = lerp(val, nextVal, remainder);
-
-		return interpolatedVal;
-	}
-
 	createSystem(color: Color4, type: number, name: string) {
 		const particleSystem1 = new ParticleSystem(name, 2000, this.scene);
 
@@ -302,18 +296,18 @@ export class SphereVisualizer {
 				// iPercent * (this.features?.complexSpectrum?.real?.length || 0),
 			);
 			const bufferVal =
-				this.getInterpolatedValue(
+				getInterpolatedValue(
 					this.features?.buffer,
 					i,
 					vertexPosBuffer.length,
 				) || 1;
 			const chromaVal =
-				this.getInterpolatedValue(
+				getInterpolatedValue(
 					this.features?.chroma,
 					i,
 					vertexPosBuffer.length,
 				) || 0;
-			const loudnessVal = this.getInterpolatedValue(
+			const loudnessVal = getInterpolatedValue(
 				this.features?.loudness?.specific,
 				i,
 				vertexPosBuffer.length,
@@ -371,14 +365,19 @@ export class SphereVisualizer {
 		this.particleSystem.maxEmitPower = 100 * energy;
 
 		this.ribbon.material.wireframe = rmsPercent > 0.5;
+
+		this.sphereOrbit.update(elapsedTime);
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
 		this.analyser = analyser;
+		this.sphereOrbit.setMeydaAnalyser(analyser);
 	}
 
 	setMeydaFeatures(features: Record<string, any>) {
 		this.features = features;
+		this.sphereOrbit.setMeydaFeatures(features);
+
 		// console.log(this.features);
 	}
 }
