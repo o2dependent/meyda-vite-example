@@ -19,11 +19,11 @@ import {
 	ParticleSystem,
 	Texture,
 	MeshParticleEmitter,
+	HighlightLayer,
 } from "@babylonjs/core";
 import { lerp } from "../math";
 import type Meyda from "meyda";
 import { getInterpolatedValue } from "../getInterpolatedValue";
-import { SphereOrbit } from "./SphereOrbit";
 
 export class SphereVisualizer {
 	scene: Scene;
@@ -32,7 +32,12 @@ export class SphereVisualizer {
 	paths: Vector3[][];
 	vertexPosBuffer: FloatArray;
 	particleSystem: ParticleSystem;
-	sphereOrbit: SphereOrbit;
+	shaderColors = {
+		colorA: new Color3(1, 0.1, 0.21),
+		colorB: new Color3(1, 0.56, 0.1),
+		colorC: new Color3(1, 0.2, 0.1),
+		colorD: new Color3(0.1, 0.1, 0.1),
+	};
 
 	analyser: Meyda.MeydaAnalyzer;
 	features: Record<string, any>;
@@ -56,9 +61,9 @@ export class SphereVisualizer {
 
 		this.paths = [];
 		const colors: Color4[] = [];
-		for (let t = 0; t < Math.PI; t += Math.PI / 60) {
+		for (let t = 0; t < Math.PI; t += Math.PI / 400) {
 			const path = [];
-			for (let a = 0; a < 2 * Math.PI; a += Math.PI / 60) {
+			for (let a = 0; a < 2 * Math.PI; a += Math.PI / 20) {
 				let x = 4 * Math.cos(a) * Math.sin(t);
 				let y = 4 * Math.sin(a) * Math.sin(t);
 				let z = 4 * Math.cos(t);
@@ -91,7 +96,8 @@ export class SphereVisualizer {
 
 		this.setParticleSystem();
 
-		this.sphereOrbit = new SphereOrbit(scene);
+		// const hl = new HighlightLayer("hl1", scene);
+		// hl.addMesh(this.ribbon, this.shaderColors.colorA);
 	}
 
 	addShaders() {
@@ -183,10 +189,10 @@ export class SphereVisualizer {
 		// this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
 		// this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.1, 0.2));
 
-		this.shaderMaterial.setColor3("colorA", new Color3(1, 0.1, 0.21));
-		this.shaderMaterial.setColor3("colorB", new Color3(1, 0.56, 0.1));
-		this.shaderMaterial.setColor3("colorC", new Color3(1, 0.2, 0.1));
-		this.shaderMaterial.setColor3("colorD", new Color3(0.1, 0.1, 0.1));
+		this.shaderMaterial.setColor3("colorA", this.shaderColors.colorA);
+		this.shaderMaterial.setColor3("colorB", this.shaderColors.colorB);
+		this.shaderMaterial.setColor3("colorC", this.shaderColors.colorC);
+		this.shaderMaterial.setColor3("colorD", this.shaderColors.colorD);
 
 		this.shaderMaterial.setFloat("uScaleFactor", 18);
 		this.shaderMaterial.setFloat("uDivisorFactor", 18);
@@ -267,7 +273,7 @@ export class SphereVisualizer {
 		this.particleSystem.emitRate = 500;
 
 		// Set the gravity of all particles
-		this.particleSystem.gravity = new Vector3(0, -100, 0);
+		this.particleSystem.gravity = new Vector3(0, -500, 0);
 
 		// Speed
 		this.particleSystem.minEmitPower = 10;
@@ -364,19 +370,15 @@ export class SphereVisualizer {
 		this.particleSystem.minEmitPower = 10 * energy;
 		this.particleSystem.maxEmitPower = 100 * energy;
 
-		this.ribbon.material.wireframe = rmsPercent > 0.5;
-
-		this.sphereOrbit.update(elapsedTime);
+		// this.ribbon.material.wireframe = rmsPercent > 0.5;
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
 		this.analyser = analyser;
-		this.sphereOrbit.setMeydaAnalyser(analyser);
 	}
 
 	setMeydaFeatures(features: Record<string, any>) {
 		this.features = features;
-		this.sphereOrbit.setMeydaFeatures(features);
 
 		// console.log(this.features);
 	}
