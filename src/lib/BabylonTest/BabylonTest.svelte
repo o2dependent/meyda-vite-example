@@ -3,6 +3,8 @@
 	import { onMount } from "svelte";
 	import { BabylonTestApp } from "./App";
 
+	let loading = true;
+
 	let app: BabylonTestApp;
 
 	let audioBuffer: AudioBuffer;
@@ -16,9 +18,13 @@
 		) as HTMLCanvasElement;
 
 		app = new BabylonTestApp(canvas);
-		audioContext = new AudioContext();
+		app.setup().then(() => {
+			audioContext = new AudioContext();
 
-		handleRemoteAudio("/audio/kthx - tothawall.mp3");
+			handleRemoteAudio("/audio/kthx - tothawall.mp3").then(
+				() => (loading = false),
+			);
+		});
 
 		return () => {
 			app.dispose();
@@ -26,6 +32,8 @@
 	});
 
 	const setAnalyzer = () => {
+		if (analyzer) analyzer.stop();
+
 		analyzer = Meyda.createMeydaAnalyzer({
 			audioContext: audioContext,
 			source: source,
@@ -144,7 +152,7 @@
 	/>
 </div>
 <canvas
-	on:click={togglePlay}
+	on:click={!loading ? togglePlay : undefined}
 	style="width: 100%; height: 100%;"
 	id="babylon-canvas"
 	width="100%"

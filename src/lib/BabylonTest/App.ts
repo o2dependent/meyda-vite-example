@@ -17,6 +17,7 @@ import {
 	PointLight,
 	Vector2,
 	Color4,
+	WebGPUEngine,
 } from "@babylonjs/core";
 import { NeonBox } from "./NeonBox";
 import { Tunnel } from "./Tunnel";
@@ -47,10 +48,16 @@ export class BabylonTestApp {
 	cameraType: "arcRotate" | "free" = "arcRotate";
 	cameraLight: boolean = true;
 	flashLight: PointLight;
+	canvas: HTMLCanvasElement;
 
 	constructor(canvas: HTMLCanvasElement) {
+		this.canvas = canvas;
+	}
+
+	async setup() {
 		// initialize babylon scene and engine
-		const engine = new Engine(canvas, true);
+		const engine = new WebGPUEngine(this.canvas);
+		await engine.initAsync();
 		const scene = new Scene(engine);
 
 		scene.clearColor = new Color4(0, 0, 0, 1);
@@ -64,12 +71,12 @@ export class BabylonTestApp {
 				Vector3.Zero(),
 				scene,
 			);
-			this.camera.attachControl(canvas, true);
+			this.camera.attachControl(this.canvas, true);
 		} else if (this.cameraType === "free") {
 			this.camera = new FreeCamera("camera1", Vector3.Zero(), scene);
 			this.camera.fov = 45;
 			this.camera.setTarget(Vector3.Left());
-			this.camera.attachControl(canvas, true);
+			this.camera.attachControl(this.canvas, true);
 		}
 
 		if (this.cameraLight) {

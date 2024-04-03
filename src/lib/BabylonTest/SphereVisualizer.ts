@@ -61,9 +61,9 @@ export class SphereVisualizer {
 
 		this.paths = [];
 		const colors: Color4[] = [];
-		for (let t = 0; t < Math.PI; t += Math.PI / 400) {
+		for (let t = 0; t < Math.PI; t += Math.PI / 180) {
 			const path = [];
-			for (let a = 0; a < 2 * Math.PI; a += Math.PI / 20) {
+			for (let a = 0; a < 2 * Math.PI; a += Math.PI / 60) {
 				let x = 4 * Math.cos(a) * Math.sin(t);
 				let y = 4 * Math.sin(a) * Math.sin(t);
 				let z = 4 * Math.cos(t);
@@ -273,7 +273,7 @@ export class SphereVisualizer {
 		this.particleSystem.emitRate = 500;
 
 		// Set the gravity of all particles
-		this.particleSystem.gravity = new Vector3(0, -500, 0);
+		this.particleSystem.gravity = new Vector3(0, -100, 0);
 
 		// Speed
 		this.particleSystem.minEmitPower = 10;
@@ -353,27 +353,24 @@ export class SphereVisualizer {
 		}
 
 		const energy = (this.features?.energy || 0) / 100;
-		const rmsPercent = (this.features?.rms || 0) / 100;
+		const rms = this.features?.rms || 0;
 		const spectralCentroidPercent =
 			(this.features?.spectralCentroid || 0) / 100;
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
 
-		this.ribbon.rotate(
-			new Vector3(spectralCentroidPercent, rmsPercent, 1),
-			0.05,
-		);
+		this.ribbon.rotate(new Vector3(spectralCentroidPercent, rms, 1), 0.05);
 
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 
-		this.particleSystem.emitRate = 1000 * energy;
+		this.particleSystem.emitRate = rms > 0.25 ? 1000 * energy : 0;
 		this.particleSystem.minEmitPower = 10 * energy;
 		this.particleSystem.maxEmitPower = 100 * energy;
 
-		this.shaderMaterial.setFloat("uScaleFactor", 18 - 18 * energy);
-		this.shaderMaterial.setFloat("uDivisorFactor", 18 - 18 * energy);
+		this.shaderMaterial.setFloat("uScaleFactor", 2 + 8 * energy);
+		this.shaderMaterial.setFloat("uDivisorFactor", 18);
 
-		// this.ribbon.material.wireframe = rmsPercent > 0.5;
+		// this.ribbon.material.wireframe = rms > 0.5;
 	}
 
 	setMeydaAnalyser(analyser: Meyda.MeydaAnalyzer) {
