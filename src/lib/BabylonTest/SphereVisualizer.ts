@@ -24,6 +24,7 @@ import {
 import { lerp } from "../math";
 import type Meyda from "meyda";
 import { getInterpolatedValue } from "../getInterpolatedValue";
+import { buffers } from "../TestWebGl/buffers.store";
 
 export class SphereVisualizer {
 	scene: Scene;
@@ -347,9 +348,9 @@ export class SphereVisualizer {
 
 			const newZ = newRadius * Math.cos(phi);
 
-			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.1);
-			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.1);
-			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.1);
+			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.2);
+			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.2);
+			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.2);
 		}
 
 		const energy = (this.features?.energy || 0) / 100;
@@ -378,7 +379,11 @@ export class SphereVisualizer {
 	}
 
 	setMeydaFeatures(features: Record<string, any>) {
+		// multiply all highend buffer values by 5 and replace them to the buffer
 		this.features = features;
+		this.features.loudness.specific = this.features?.loudness?.specific?.map(
+			(val: number, i: number) => (i >= 18 ? val * 5 : val),
+		);
 
 		// console.log(this.features);
 	}
