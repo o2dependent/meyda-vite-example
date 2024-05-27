@@ -86,10 +86,10 @@
 			(color, i) => {
 				// Store a few values for each lines' spring movement
 				const line = {
-					spring: random(0.02, 0.1),
-					friction: random(0.7, 0.95),
+					spring: random(0.02, 0.03),
+					friction: random(0.9, 0.95),
 					mouseVelocity: new Vec3(),
-					mouseOffset: new Vec3(random(-1, 1) * 0.02),
+					mouseOffset: new Vec3(random(-1, 1) * 0.002),
 					polyline: null,
 				} as {
 					spring: number;
