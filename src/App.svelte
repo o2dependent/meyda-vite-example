@@ -1,7 +1,7 @@
 <script lang="ts">
 	import logo from "./assets/svelte.png";
 	import AudioInput from "./lib/AudioInput.svelte";
-	import BabylonTest from "./lib/BabylonTest/BabylonTest.svelte";
+	import SphereVisualizer from "./lib/SphereVisualizer/SphereVisualizer.svelte";
 	import Counter from "./lib/Counter.svelte";
 	import Gallery from "./lib/Gallery/Gallery.svelte";
 	import Metaballs from "./lib/Metaballs/Metaballs.svelte";
@@ -19,7 +19,7 @@
 
 <!-- <PostFluidDistortion /> -->
 
-<BabylonTest />
+<SphereVisualizer />
 
 <!-- <Gallery /> -->
 
