@@ -20,6 +20,10 @@ import {
 	Texture,
 	MeshParticleEmitter,
 	HighlightLayer,
+	HemisphericLight,
+	ShadowGenerator,
+	DirectionalLight,
+	ShadowDepthWrapper,
 } from "@babylonjs/core";
 import { lerp } from "../math";
 import type Meyda from "meyda";
@@ -47,6 +51,12 @@ export class SphereVisualizer {
 		this.scene = scene;
 		this.addShaders();
 		this.setShaderMaterial();
+
+		var light = new DirectionalLight("dir01", new Vector3(-1, -2, 1), scene);
+		light.position = new Vector3(20, 40, -20);
+		light.diffuse = new Color3(1, 0, 0);
+		light.specular = new Color3(0, 1, 0);
+		// light.groundColor = new Color3(1, 1, 0);
 
 		// Create a glow layer
 		const gl = new GlowLayer("glow", scene, {
@@ -85,15 +95,27 @@ export class SphereVisualizer {
 			sideOrientation: Mesh.FLIP_TILE,
 			updatable: true,
 		});
-		// ribbon.material = neonMaterial;
 
 		gl.addIncludedOnlyMesh(ribbon);
+
+		var shadowGenerator = new ShadowGenerator(1024, light);
+
+		shadowGenerator.getShadowMap().renderList.push(this.ribbon);
+		shadowGenerator.useBlurCloseExponentialShadowMap = true;
+		shadowGenerator.forceBackFacesOnly = true;
+		shadowGenerator.blurKernel = 32;
+		shadowGenerator.useKernelBlur = true;
 
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
 		// this.ribbon.material = neonMaterial;
-		this.ribbon.material = this.shaderMaterial;
 		// this.ribbon.material.wireframe = true;
+		// this.shaderMaterial.shadowDepthWrapper = new ShadowDepthWrapper(
+		// 	this.shaderMaterial,
+		// 	scene,
+		// );
+		this.ribbon.material = this.shaderMaterial;
+		this.ribbon.receiveShadows = true;
 
 		this.setParticleSystem();
 
@@ -381,8 +403,9 @@ export class SphereVisualizer {
 	setMeydaFeatures(features: Record<string, any>) {
 		// multiply all highend buffer values by 5 and replace them to the buffer
 		this.features = features;
-		this.features.loudness.specific = this.features?.loudness?.specific?.map(
-			(val: number, i: number) => (i >= 18 ? val * 5 : val),
+		const lSpec = this.features?.loudness?.specific;
+		this.features.loudness.specific = lSpec?.map((val: number, i: number) =>
+			i >= (lSpec * 3) / 4 ? val * 5 : val,
 		);
 
 		// console.log(this.features);

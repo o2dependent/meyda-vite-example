@@ -58,6 +58,7 @@ export class BabylonTestApp {
 		// initialize babylon scene and engine
 		const engine = new WebGPUEngine(this.canvas);
 		await engine.initAsync();
+		// const engine = new Engine(this.canvas);
 		const scene = new Scene(engine);
 
 		scene.clearColor = new Color4(0, 0, 0, 1);
