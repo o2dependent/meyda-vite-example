@@ -305,6 +305,31 @@ export class SphereVisualizer {
 			VertexBuffer.PositionKind,
 		);
 
+		this.shaderMaterial.setColor3(
+			"colorA",
+			this.shaderColors.colorA.subtract(
+				new Color3(0, 0, Math.sin(this.features?.spectralFlatness || 0)),
+			),
+		);
+		this.shaderMaterial.setColor3(
+			"colorB",
+			this.shaderColors.colorB.subtract(
+				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+			),
+		);
+		this.shaderMaterial.setColor3(
+			"colorC",
+			this.shaderColors.colorC.add(
+				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+			),
+		);
+		this.shaderMaterial.setColor3(
+			"colorD",
+			this.shaderColors.colorD.add(
+				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+			),
+		);
+
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
 			const y = vertexPosBuffer[i + 1];
@@ -404,11 +429,11 @@ export class SphereVisualizer {
 		const lSpec = this.features?.loudness?.specific;
 		// hardcoding, but not actually using the variable because it makes it easier to see what bands you are targeting
 		// const lSpecLength = 24
-		this.features.loudness.specific = lSpec?.map((val: number, i: number) => {
-			if (i >= 20) return val * 3;
-			if (i >= 15) return val * 5;
-			else return val;
-		});
+		// this.features.loudness.specific = lSpec?.map((val: number, i: number) => {
+		// 	if (i >= 20) return val * 3;
+		// 	if (i >= 15) return val * 5;
+		// 	else return val;
+		// });
 
 		// console.log(this.features);
 	}
