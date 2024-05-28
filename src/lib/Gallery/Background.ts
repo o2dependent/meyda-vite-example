@@ -1,7 +1,7 @@
 import {
 	Color,
 	Mesh,
-	OGLRenderingContext,
+	type OGLRenderingContext,
 	Plane,
 	Program,
 	Renderer,
@@ -21,11 +21,10 @@ interface ConstructorArgs {
 
 export class Background {
 	gl: OGLRenderingContext;
-	plane: Mesh;
 	renderer: Renderer;
 	scene: Transform;
 	viewport: { width: number; height: number };
-	screen: { width: number; height: number };
+	screen: { width: number; height: number } = { height: 0, width: 0 };
 	geometry: Plane;
 	program: Program;
 	items: {

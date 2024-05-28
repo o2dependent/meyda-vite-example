@@ -7,35 +7,26 @@ import {
 	StandardMaterial,
 	Color3,
 	Mesh,
-	Engine,
-	Matrix,
-	LinesMesh,
-	CreateGreasedLine,
-	GreasedLineMeshColorDistribution,
-	FloatArray,
+	type FloatArray,
 	Color4,
 	Effect,
 	ShaderMaterial,
 	ParticleSystem,
 	Texture,
 	MeshParticleEmitter,
-	HighlightLayer,
-	HemisphericLight,
 	ShadowGenerator,
 	DirectionalLight,
-	ShadowDepthWrapper,
+	type Nullable,
 } from "@babylonjs/core";
 import { lerp } from "../math";
-import type Meyda from "meyda";
 import { getInterpolatedValue } from "../getInterpolatedValue";
-import { buffers } from "../TestWebGl/buffers.store";
 
 export class SphereVisualizer {
 	scene: Scene;
 	shaderMaterial: ShaderMaterial;
 	ribbon: Mesh;
 	paths: Vector3[][];
-	vertexPosBuffer: FloatArray;
+	vertexPosBuffer: Nullable<FloatArray>;
 	particleSystem: ParticleSystem;
 	shaderColors = {
 		colorA: new Color3(1, 0.1, 0.21),
@@ -44,18 +35,18 @@ export class SphereVisualizer {
 		colorD: new Color3(0.1, 0.1, 0.1),
 	};
 
-	analyser: Meyda.MeydaAnalyzer;
-	features: Record<string, any>;
+	analyser: Meyda.MeydaAnalyzer | null = null;
+	features: Record<string, any> = {};
 
 	constructor(scene: Scene) {
 		this.scene = scene;
 		this.addShaders();
-		this.setShaderMaterial();
+		this.shaderMaterial = this.makeShaderMaterial();
 
-		var light = new DirectionalLight("dir01", new Vector3(-1, -2, 1), scene);
-		light.position = new Vector3(20, 40, -20);
-		light.diffuse = new Color3(1, 0, 0);
-		light.specular = new Color3(0, 1, 0);
+		// var light = new DirectionalLight("dir01", new Vector3(-1, -2, 1), scene);
+		// light.position = new Vector3(20, 40, -20);
+		// light.diffuse = new Color3(1, 0, 0);
+		// light.specular = new Color3(0, 1, 0);
 		// light.groundColor = new Color3(1, 1, 0);
 
 		// Create a glow layer
@@ -73,7 +64,7 @@ export class SphereVisualizer {
 		this.paths = [];
 		const colors: Color4[] = [];
 		for (let t = 0; t < Math.PI; t += Math.PI / 180) {
-			const path = [];
+			const path: Vector3[] = [];
 			for (let a = 0; a < 2 * Math.PI; a += Math.PI / 60) {
 				let x = 4 * Math.cos(a) * Math.sin(t);
 				let y = 4 * Math.sin(a) * Math.sin(t);
@@ -98,27 +89,28 @@ export class SphereVisualizer {
 
 		gl.addIncludedOnlyMesh(ribbon);
 
-		var shadowGenerator = new ShadowGenerator(1024, light);
+		// var shadowGenerator = new ShadowGenerator(1024, light);
 
-		shadowGenerator.getShadowMap().renderList.push(this.ribbon);
-		shadowGenerator.useBlurCloseExponentialShadowMap = true;
-		shadowGenerator.forceBackFacesOnly = true;
-		shadowGenerator.blurKernel = 32;
-		shadowGenerator.useKernelBlur = true;
+		// shadowGenerator?.getShadowMap?.()?.renderList?.push(ribbon);
+		// shadowGenerator.useBlurCloseExponentialShadowMap = true;
+		// shadowGenerator.forceBackFacesOnly = true;
+		// shadowGenerator.blurKernel = 32;
+		// shadowGenerator.useKernelBlur = true;
 
 		this.vertexPosBuffer = ribbon.getVerticesData(VertexBuffer.PositionKind);
 		this.ribbon = ribbon;
 		// this.ribbon.material = neonMaterial;
-		// this.ribbon.material.wireframe = true;
 		// this.shaderMaterial.shadowDepthWrapper = new ShadowDepthWrapper(
 		// 	this.shaderMaterial,
 		// 	scene,
 		// );
 		this.ribbon.material = this.shaderMaterial;
+		// this.ribbon.material.wireframe = true;
 		this.ribbon.receiveShadows = true;
 
-		this.setParticleSystem();
+		this.particleSystem = this.makeParticleSystem();
 
+		console.log(this);
 		// const hl = new HighlightLayer("hl1", scene);
 		// hl.addMesh(this.ribbon, this.shaderColors.colorA);
 	}
@@ -180,8 +172,8 @@ export class SphereVisualizer {
 `;
 	}
 
-	setShaderMaterial() {
-		this.shaderMaterial = new ShaderMaterial(
+	makeShaderMaterial() {
+		const shaderMaterial = new ShaderMaterial(
 			"sphereVisualizer",
 			this.scene,
 			"sphereVisualizer",
@@ -199,36 +191,36 @@ export class SphereVisualizer {
 				],
 			},
 		);
+		shaderMaterial.allowShaderHotSwapping = true;
 
-		this.shaderMaterial.allowShaderHotSwapping = true;
+		// shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
+		// shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
+		// shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
+		// shaderMaterial.setColor3("colorD", new Color3(0.0, 0.33, 0.67));
 
-		// this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
-		// this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
-		// this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
-		// this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.33, 0.67));
+		// shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
+		// shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
+		// shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
+		// shaderMaterial.setColor3("colorD", new Color3(0.0, 0.1, 0.2));
 
-		// this.shaderMaterial.setColor3("colorA", new Color3(0.5, 0.5, 0.5));
-		// this.shaderMaterial.setColor3("colorB", new Color3(0.5, 0.5, 0.5));
-		// this.shaderMaterial.setColor3("colorC", new Color3(1.0, 1.0, 1.0));
-		// this.shaderMaterial.setColor3("colorD", new Color3(0.0, 0.1, 0.2));
+		shaderMaterial.setColor3("colorA", this.shaderColors.colorA);
+		shaderMaterial.setColor3("colorB", this.shaderColors.colorB);
+		shaderMaterial.setColor3("colorC", this.shaderColors.colorC);
+		shaderMaterial.setColor3("colorD", this.shaderColors.colorD);
 
-		this.shaderMaterial.setColor3("colorA", this.shaderColors.colorA);
-		this.shaderMaterial.setColor3("colorB", this.shaderColors.colorB);
-		this.shaderMaterial.setColor3("colorC", this.shaderColors.colorC);
-		this.shaderMaterial.setColor3("colorD", this.shaderColors.colorD);
+		shaderMaterial.setFloat("uScaleFactor", 18);
+		shaderMaterial.setFloat("uDivisorFactor", 18);
 
-		this.shaderMaterial.setFloat("uScaleFactor", 18);
-		this.shaderMaterial.setFloat("uDivisorFactor", 18);
-
-		this.shaderMaterial.setFloat(
+		shaderMaterial.setFloat(
 			"iTime",
 			this.scene.getEngine().getDeltaTime() / 1000,
 		); // Convert to seconds
+		return shaderMaterial;
 	}
 
 	setPosition(x: number, y: number, z: number) {}
 
-	createSystem(color: Color4, type: number, name: string) {
+	createParticleSystem(color: Color4, type: number, name: string) {
 		const particleSystem1 = new ParticleSystem(name, 2000, this.scene);
 
 		//Texture of each particle
@@ -263,56 +255,55 @@ export class SphereVisualizer {
 		return particleSystem1;
 	}
 
-	setParticleSystem() {
+	makeParticleSystem() {
 		// Create a particle system
-		const engine = this.scene.getEngine();
-
-		this.particleSystem = new ParticleSystem("particles", 10000, this.scene);
-		this.particleSystem.particleTexture = new Texture(
+		const particleSystem = new ParticleSystem("particles", 10000, this.scene);
+		particleSystem.particleTexture = new Texture(
 			"/textures/flare.png",
 			this.scene,
 		);
 
 		// Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
-		this.particleSystem.blendMode = ParticleSystem.BLENDMODE_ONEONE;
+		particleSystem.blendMode = ParticleSystem.BLENDMODE_ONEONE;
 
-		this.particleSystem.customShader = this.shaderMaterial;
+		particleSystem.customShader = this.shaderMaterial;
 
-		this.particleSystem.minSize = 0.125;
-		this.particleSystem.maxSize = 0.25;
+		particleSystem.minSize = 0.125;
+		particleSystem.maxSize = 0.25;
 
 		// Where the particles come from
 		var meshEmitter = new MeshParticleEmitter(this.ribbon);
 		meshEmitter.useMeshNormalsForDirection = true;
-		this.particleSystem.particleEmitterType = meshEmitter;
+		particleSystem.particleEmitterType = meshEmitter;
 
-		this.particleSystem.emitter = this.ribbon;
+		particleSystem.emitter = this.ribbon;
 
 		// Life time of each particle (random between...
-		this.particleSystem.minLifeTime = 0.25;
-		this.particleSystem.maxLifeTime = 1.5;
+		particleSystem.minLifeTime = 0.25;
+		particleSystem.maxLifeTime = 1.5;
 
 		// Emission rate
-		this.particleSystem.emitRate = 500;
+		particleSystem.emitRate = 500;
 
 		// Set the gravity of all particles
-		this.particleSystem.gravity = new Vector3(0, -100, 0);
+		particleSystem.gravity = new Vector3(0, -100, 0);
 
 		// Speed
-		this.particleSystem.minEmitPower = 10;
-		this.particleSystem.maxEmitPower = 100;
-		// this.particleSystem.updateSpeed = 1 / 120;
+		particleSystem.minEmitPower = 10;
+		particleSystem.maxEmitPower = 100;
+		// particleSystem.updateSpeed = 1 / 120;
 
 		// Start the particle system
-		this.particleSystem.start();
+		particleSystem.start();
+
+		return particleSystem;
 	}
 
 	update(elapsedTime: number) {
-		const vertexPosBuffer = [...this.vertexPosBuffer];
+		const vertexPosBuffer = [...(this?.vertexPosBuffer ?? [])];
 		const curVertPosBuf = this.ribbon.getVerticesData(
 			VertexBuffer.PositionKind,
 		);
-		console.log(this.features);
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
@@ -370,6 +361,13 @@ export class SphereVisualizer {
 
 			const newZ = newRadius * Math.cos(phi);
 
+			if (
+				typeof curVertPosBuf?.[i] === "undefined" &&
+				typeof curVertPosBuf?.[i + 1] === "undefined" &&
+				typeof curVertPosBuf?.[i + 2] === "undefined"
+			) {
+				continue;
+			}
 			vertexPosBuffer[i] = lerp(curVertPosBuf[i], newX, 0.2);
 			vertexPosBuffer[i + 1] = lerp(curVertPosBuf[i + 1], newY, 0.2);
 			vertexPosBuffer[i + 2] = lerp(curVertPosBuf[i + 2], newZ, 0.2);
@@ -404,9 +402,12 @@ export class SphereVisualizer {
 		// multiply all highend buffer values by 5 and replace them to the buffer
 		this.features = features;
 		const lSpec = this.features?.loudness?.specific;
-		this.features.loudness.specific = lSpec?.map((val: number, i: number) =>
-			i >= (lSpec * 3) / 4 ? val * 5 : val,
-		);
+		this.features.loudness.specific = lSpec?.map((val: number, i: number) => {
+			if (i >= (lSpec?.length * 3) / 4) return val * 5;
+			else if (i <= lSpec?.length / 8) return val / 3;
+			else if (i <= lSpec?.length / 4) return val / 2;
+			else return val;
+		});
 
 		// console.log(this.features);
 	}

@@ -1,20 +1,26 @@
-import { Renderer, Camera, Transform, OGLRenderingContext, Plane } from "ogl";
+import {
+	Renderer,
+	Camera,
+	Transform,
+	type OGLRenderingContext,
+	Plane,
+} from "ogl";
 import NormalizedWheel from "normalize-wheel";
 import Media from "./Media";
 import { lerp } from "../math";
 import debounce from "lodash/debounce";
-import { DebouncedFunc } from "lodash";
+import { type DebouncedFunc } from "lodash";
 import { Background } from "./Background";
 
 export default class GalleryApp {
 	screen: {
 		width: number;
 		height: number;
-	};
+	} = { height: 0, width: 0 };
 	viewport: {
 		width: number;
 		height: number;
-	};
+	} = { height: 0, width: 0 };
 	renderer: Renderer;
 	gl: OGLRenderingContext;
 	camera: Camera;
@@ -46,15 +52,19 @@ export default class GalleryApp {
 	background: Background;
 
 	constructor() {
-		this.createRenderer();
-		this.createCamera();
-		this.createScene();
+		const { gl, renderer } = this.makeRenderer();
+		this.renderer = renderer;
+		this.gl = gl;
+		this.camera = this.makeCamera();
+		this.scene = this.makeScene();
 
 		this.onResize();
 
-		this.createGeometry();
-		this.createGalleryMedia();
-		this.createBackground();
+		this.planeGeometry = this.makeGeometry();
+		const { medias, mediasImages } = this.makeGalleryMedia();
+		this.mediasImages = mediasImages;
+		this.medias = medias;
+		this.background = this.makeBackground();
 
 		this.update();
 
@@ -63,46 +73,49 @@ export default class GalleryApp {
 		this.onCheckDebounce = debounce(this.onCheck, 200);
 	}
 
-	createBackground() {
-		this.background = new Background({
+	makeBackground() {
+		const background = new Background({
 			gl: this.gl,
 			scene: this.scene,
 			viewport: this.viewport,
 			screen: this.screen,
 			renderer: this.renderer,
 		});
+		return background;
 	}
 
-	createRenderer() {
-		this.renderer = new Renderer();
+	makeRenderer() {
+		const renderer = new Renderer();
 
-		this.gl = this.renderer.gl;
-		this.gl.clearColor(0.0, 0.0, 0.0, 1);
+		const gl = this.renderer.gl;
+		gl.clearColor(0.0, 0.0, 0.0, 1);
 		// this.gl.clearColor(1.0, 0.0, 0.0, 1);
 		// this.gl.clearColor(0.125, 0.125, 0.125, 1);
 
 		document.body.appendChild(this.gl.canvas);
+		return { renderer, gl };
 	}
 
-	createCamera() {
-		this.camera = new Camera(this.gl);
-		this.camera.fov = 45;
-		this.camera.position.z = 20;
+	makeCamera() {
+		const camera = new Camera(this.gl);
+		camera.fov = 45;
+		camera.position.z = 20;
+		return camera;
 	}
 
-	createScene() {
-		this.scene = new Transform();
+	makeScene() {
+		return new Transform();
 	}
 
-	createGeometry() {
-		this.planeGeometry = new Plane(this.gl, {
+	makeGeometry() {
+		return new Plane(this.gl, {
 			heightSegments: 50,
 			widthSegments: 100,
 		});
 	}
 
-	createGalleryMedia() {
-		this.mediasImages = [
+	makeGalleryMedia() {
+		const mediasImages = [
 			{ image: "/images/mar-9-2024.jpg", text: "Mar 9 2024" },
 			{ image: "/images/mar-10-2024.jpg", text: "Mar 10 2024" },
 			{ image: "/images/mar-11-2024.jpg", text: "Mar 11 2024" },
@@ -113,7 +126,7 @@ export default class GalleryApp {
 			{ image: "/images/mar-16-2024.jpg", text: "Mar 16 2024" },
 		];
 
-		this.medias = this.mediasImages.map(({ image, text }, index) => {
+		const medias = this.mediasImages.map(({ image, text }, index) => {
 			const media = new Media({
 				geometry: this.planeGeometry,
 				gl: this.gl,
@@ -129,6 +142,7 @@ export default class GalleryApp {
 
 			return media;
 		});
+		return { medias, mediasImages };
 	}
 	/**
 	 * Events
@@ -255,6 +269,7 @@ export default class GalleryApp {
 	addEventListeners() {
 		window.addEventListener("resize", this.onResize.bind(this));
 
+		// @ts-ignore
 		window.addEventListener("mousewheel", this.onWheel.bind(this));
 		window.addEventListener("wheel", this.onWheel.bind(this));
 

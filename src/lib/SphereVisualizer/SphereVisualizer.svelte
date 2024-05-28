@@ -3,7 +3,10 @@
 	import { onMount } from "svelte";
 	import { BabylonTestApp } from "./App";
 
+	export let audioList: { name: string; url: string }[] = [];
+
 	let loading = true;
+	let isAudioListOpen = false;
 
 	let app: BabylonTestApp;
 
@@ -62,7 +65,7 @@
 			inputs: 2,
 			callback: (_features) => {
 				features = _features;
-				app.setMeydaFeatures(features);
+				if (features !== null) app.setMeydaFeatures(features);
 			},
 		});
 		analyzer.start();
@@ -76,7 +79,7 @@
 			const reader = new FileReader();
 
 			reader.onload = (e) => {
-				const buffer = e.target.result;
+				const buffer = e?.target?.result;
 				loadAudioBuffer(buffer).then(setAnalyzer);
 			};
 
@@ -128,28 +131,38 @@
 	const togglePlay = () => (playing ? stopAudio() : playAudio());
 </script>
 
-<div class="fixed bottom-0 left-0 p-2 flex justify-center items-center">
-	<button
-		class="bg-blue-50"
-		type="button"
-		on:click={() => handleRemoteAudio("/audio/kthx - tothawall.mp3")}
-	>
-		kthx - tothawall.mp3
-	</button>
-	<button
-		class="bg-blue-50"
-		type="button"
-		on:click={() =>
-			handleRemoteAudio("/audio/Enzuna: Stepa K - Shadow (Enzuna Remix).mp3")}
-	>
-		Enzuna: Stepa K - Shadow (Enzuna Remix)
-	</button>
-	<input
-		style="width: 10rem;"
-		type="file"
-		accept=".mp3, .mp4"
-		on:change={handleFileChange}
-	/>
+<div
+	class="fixed bottom-2 left-1/2 -translate-x-1/2 container rounded-full px-2 py-1 bg-gray-950 border border-gray-700"
+>
+	<div class="flex gap-2">
+		<button type="button">
+			{loading ? "Loading..." : playing ? "Stop" : "Play"}
+		</button>
+		<button type="button" on:click={() => (isAudioListOpen = !isAudioListOpen)}>
+		</button>
+		<div
+			class="absolute bottom-full -translate-y-2 left-0 p-2 flex justify-center items-center"
+		>
+			{#each audioList as { name, url }}
+				<!-- content here -->
+				<button
+					class="bg-blue-50"
+					type="button"
+					on:click={() => handleRemoteAudio(url)}
+				>
+					{name}
+				</button>
+			{:else}
+				<p>No audio here!</p>
+			{/each}
+			<input
+				style="width: 10rem;"
+				type="file"
+				accept=".mp3, .mp4"
+				on:change={handleFileChange}
+			/>
+		</div>
+	</div>
 </div>
 <canvas
 	on:click={!loading ? togglePlay : undefined}

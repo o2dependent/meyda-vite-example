@@ -7,15 +7,8 @@ import {
 	Vector3,
 	HemisphericLight,
 	Mesh,
-	MeshBuilder,
-	Color3,
-	StandardMaterial,
-	GlowLayer,
-	VertexBuffer,
-	Matrix,
 	FreeCamera,
 	PointLight,
-	Vector2,
 	Color4,
 	WebGPUEngine,
 } from "@babylonjs/core";
@@ -25,29 +18,21 @@ import { SphereVisualizer } from "./SphereVisualizer";
 import type Meyda from "meyda";
 
 export class BabylonTestApp {
-	matricesData: Float32Array;
-	colorData: Float32Array;
-	instanceCount: number;
-	box: Mesh;
-	numPerSide: number;
-	size: number;
-	ofst: number;
+	nodes: any[] = [];
 
-	nodes: any[];
+	engine: WebGPUEngine | null = null;
+	scene: Scene | null = null;
+	camera: ArcRotateCamera | FreeCamera | null = null;
 
-	engine: Engine;
-	scene: Scene;
-	camera: ArcRotateCamera | FreeCamera;
-
-	analyser: Meyda.MeydaAnalyzer;
-	features: Record<string, any>;
+	analyser: Meyda.MeydaAnalyzer | null = null;
+	features: Record<string, any> = {};
 
 	activeNodes: ("neonBox" | "tunnel" | "sphereVisualizer")[] = [
 		"sphereVisualizer",
 	];
 	cameraType: "arcRotate" | "free" = "arcRotate";
 	cameraLight: boolean = true;
-	flashLight: PointLight;
+	flashLight: PointLight | null = null;
 	canvas: HTMLCanvasElement;
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -58,7 +43,6 @@ export class BabylonTestApp {
 		// initialize babylon scene and engine
 		const engine = new WebGPUEngine(this.canvas);
 		await engine.initAsync();
-		// const engine = new Engine(this.canvas);
 		const scene = new Scene(engine);
 
 		scene.clearColor = new Color4(0, 0, 0, 1);
@@ -163,8 +147,8 @@ export class BabylonTestApp {
 			elapsedTime += engine.getDeltaTime();
 			this.nodes.forEach((node) => node?.update?.(elapsedTime));
 
-			if (this.cameraLight) {
-				this.flashLight.position = scene.activeCamera.position;
+			if (this.cameraLight && this.flashLight && scene?.activeCamera) {
+				this.flashLight.position = scene?.activeCamera?.position;
 			}
 
 			scene.render();
@@ -185,8 +169,8 @@ export class BabylonTestApp {
 	}
 
 	dispose() {
-		this.engine.dispose();
-		this.scene.dispose();
+		this?.engine?.dispose();
+		this?.scene?.dispose();
 
 		this.engine = null;
 		this.scene = null;

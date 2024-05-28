@@ -1,7 +1,7 @@
 import {
 	Color,
 	Mesh,
-	OGLRenderingContext,
+	type OGLRenderingContext,
 	Geometry,
 	Program,
 	Renderer,
@@ -23,12 +23,12 @@ interface ConstructorArgs {
 
 export class Title {
 	gl: OGLRenderingContext;
-	scene: Transform;
+	scene: Transform | null = null;
 	plane: Mesh;
 	text: string;
 	renderer: Renderer;
-	program: Program;
-	mesh: Mesh;
+	program: Program | null = null;
+	mesh: Mesh | null = null;
 
 	constructor({ gl, plane, renderer, text }: ConstructorArgs) {
 		this.gl = gl;
@@ -121,7 +121,7 @@ export class Title {
 		});
 
 		// geometry.computeBoundingBox();
-
+		if (!this.program) throw new Error("No program found");
 		this.mesh = new Mesh(this.gl, { geometry, program: this.program });
 		this.mesh.position.y = -0.585;
 		this.mesh.setParent(this.plane);

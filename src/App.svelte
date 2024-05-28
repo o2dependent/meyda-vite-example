@@ -19,7 +19,15 @@
 
 <!-- <PostFluidDistortion /> -->
 
-<SphereVisualizer />
+<SphereVisualizer
+	audioList={[
+		{ url: "/audio/kthx - tothawall.mp3", name: "kthx - tothawall" },
+		{
+			url: "/audio/Enzuna: Stepa K - Shadow (Enzuna Remix).mp3",
+			name: "Enzuna: Stepa K - Shadow (Enzuna Remix)",
+		},
+	]}
+/>
 
 <!-- <Gallery /> -->
 

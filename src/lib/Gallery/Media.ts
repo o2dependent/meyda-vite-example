@@ -1,6 +1,6 @@
 import {
 	Mesh,
-	OGLRenderingContext,
+	type OGLRenderingContext,
 	Plane,
 	Program,
 	Renderer,
@@ -12,7 +12,7 @@ import fragment from "./shaders/media/fragment.glsl?raw";
 import { map } from "../math";
 import { Title } from "./Title";
 import { IndexTitle } from "./IndexTitle";
-import { pad, padStart } from "lodash";
+import { padStart } from "lodash";
 
 interface ConstructorArgs {
 	gl: OGLRenderingContext;
@@ -44,11 +44,11 @@ export default class Media {
 	image: string;
 	index: number;
 	text: string;
-	scale: number;
-	padding: number;
-	width: number;
-	widthTotal: number;
-	x: number;
+	scale: number | null = null;
+	padding: number | null = null;
+	width: number = 0;
+	widthTotal: number = 0;
+	x: number = 0;
 	screen: {
 		width: number;
 		height: number;
@@ -60,8 +60,8 @@ export default class Media {
 	extra: number = 0;
 	isBefore: boolean = false;
 	isAfter: boolean = false;
-	indexTitle: IndexTitle;
-	title: Title;
+	indexTitle: IndexTitle | null = null;
+	title: Title | null = null;
 
 	constructor({
 		geometry,
@@ -86,8 +86,8 @@ export default class Media {
 		this.text = text;
 		this.viewport = viewport;
 
-		this.createShader();
-		this.createMesh();
+		this.program = this.makeShaderProgram();
+		this.plane = this.makeMesh();
 
 		this.onResize({ screen, viewport });
 
@@ -109,12 +109,12 @@ export default class Media {
 		});
 	}
 
-	createShader() {
+	makeShaderProgram() {
 		const texture = new Texture(this.gl, {
 			generateMipmaps: false,
 		});
 
-		this.program = new Program(this.gl, {
+		const program = new Program(this.gl, {
 			fragment,
 			vertex,
 			uniforms: {
@@ -134,20 +134,23 @@ export default class Media {
 		image.onload = (_) => {
 			texture.image = image;
 
-			this.program.uniforms.uImageSizes.value = [
+			program.uniforms.uImageSizes.value = [
 				image.naturalWidth,
 				image.naturalHeight,
 			];
 		};
+		return program;
 	}
 
-	createMesh() {
-		this.plane = new Mesh(this.gl, {
+	makeMesh() {
+		if (!this.program) throw new Error("Program not created");
+		const plane = new Mesh(this.gl, {
 			geometry: this.geometry,
 			program: this.program,
 		});
 
-		this.plane.setParent(this.scene);
+		plane.setParent(this.scene);
+		return plane;
 	}
 
 	onResize({
