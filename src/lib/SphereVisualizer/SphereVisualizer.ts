@@ -402,10 +402,11 @@ export class SphereVisualizer {
 		// multiply all highend buffer values by 5 and replace them to the buffer
 		this.features = features;
 		const lSpec = this.features?.loudness?.specific;
+		// hardcoding, but not actually using the variable because it makes it easier to see what bands you are targeting
+		// const lSpecLength = 24
 		this.features.loudness.specific = lSpec?.map((val: number, i: number) => {
-			if (i >= (lSpec?.length * 3) / 4) return val * 5;
-			else if (i <= lSpec?.length / 8) return val / 3;
-			else if (i <= lSpec?.length / 4) return val / 2;
+			if (i >= 20) return val * 3;
+			if (i >= 15) return val * 5;
 			else return val;
 		});
 
