@@ -305,6 +305,39 @@ export class SphereVisualizer {
 			VertexBuffer.PositionKind,
 		);
 
+		// SET COLORS
+		const chroma = this.features?.chroma ?? [];
+		//SECTION -  SEIZURE MODE
+		// this.shaderMaterial.setColor3(
+		// 	"colorA",
+		// 	this.shaderColors.colorA.multiply(
+		// 		new Color3(
+		// 			Math.sin(chroma?.[9] ?? 1 + this.shaderColors.colorA.r),
+		// 			Math.sin(chroma?.[10] ?? 1 + this.shaderColors.colorA.g),
+		// 			Math.sin(chroma?.[11] ?? 1 + this.shaderColors.colorA.b),
+		// 		),
+		// 	),
+		// );
+		// this.shaderMaterial.setColor3(
+		// 	"colorB",
+		// 	this.shaderColors.colorB.add(
+		// 		new Color3(chroma?.[6] ?? 1, chroma?.[7] ?? 1, chroma?.[8] ?? 1),
+		// 	),
+		// );
+		// this.shaderMaterial.setColor3(
+		// 	"colorC",
+		// 	this.shaderColors.colorC.subtract(
+		// 		new Color3(chroma?.[3] ?? 1, chroma?.[4] ?? 1, chroma?.[5] ?? 1),
+		// 	),
+		// );
+		// this.shaderMaterial.setColor3(
+		// 	"colorD",
+		// 	this.shaderColors.colorD.subtract(
+		// 		new Color3(chroma?.[0] ?? 1, chroma?.[1] ?? 1, chroma?.[2] ?? 1),
+		// 	),
+		// );
+		//!SECTION
+		//SECTION - SMOOTH MODE
 		this.shaderMaterial.setColor3(
 			"colorA",
 			this.shaderColors.colorA.subtract(
@@ -329,6 +362,7 @@ export class SphereVisualizer {
 				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
 			),
 		);
+		//!SECTION
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
@@ -405,7 +439,11 @@ export class SphereVisualizer {
 
 		this.ribbon.updateVerticesData(VertexBuffer.PositionKind, vertexPosBuffer);
 
-		this.ribbon.rotate(new Vector3(spectralCentroidPercent, rms, 1), 0.05);
+		this.ribbon.rotate(
+			new Vector3(spectralCentroidPercent, (this.features?.zcr ?? 0) / 100, 1),
+			0.05,
+		);
+		console.log(this.features);
 
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 

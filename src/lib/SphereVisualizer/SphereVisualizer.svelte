@@ -141,7 +141,7 @@
 		<button type="button" on:click={() => (isAudioListOpen = !isAudioListOpen)}>
 		</button>
 		<div
-			class="absolute bottom-full -translate-y-2 left-0 p-2 flex justify-center items-center"
+			class="absolutes bottom-full -translate-y-2 left-0 p-2 flex justify-center items-center"
 		>
 			{#each audioList as { name, url }}
 				<!-- content here -->
