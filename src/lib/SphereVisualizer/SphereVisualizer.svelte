@@ -177,9 +177,9 @@
 		</div>
 		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
 		<div
-			class="flex items-center max-w-sm overflow-ellipsis whitespace-nowrap h-full w-full px-3"
+			class="flex items-center max-w-sm h-full w-full px-3 shadow-inner bg-muted rounded mx-1 text-muted-foreground whitespace-nowrap"
 		>
-			<p>{currentAudioName}</p>
+			{currentAudioName}
 		</div>
 		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
 
