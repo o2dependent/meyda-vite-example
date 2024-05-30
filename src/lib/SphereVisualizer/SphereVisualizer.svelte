@@ -106,6 +106,8 @@
 	};
 
 	const loadAudioBuffer = async (buffer) => {
+		if (playing) stopAudio();
+
 		try {
 			audioBuffer = await audioContext.decodeAudioData(buffer);
 
@@ -137,6 +139,9 @@
 		source.connect(audioContext.destination);
 		analyzer.setSource(source);
 		source.start();
+		source.addEventListener("ended", (e) => {
+			stopAudio();
+		});
 		playing = true;
 	};
 
