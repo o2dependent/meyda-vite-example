@@ -28,6 +28,7 @@ export class SphereVisualizer {
 	paths: Vector3[][];
 	vertexPosBuffer: Nullable<FloatArray>;
 	particleSystem: ParticleSystem;
+	seizureMode: boolean = false;
 	shaderColors = {
 		colorA: new Color3(1, 0.1, 0.21),
 		colorB: new Color3(1, 0.56, 0.1),
@@ -110,7 +111,6 @@ export class SphereVisualizer {
 
 		this.particleSystem = this.makeParticleSystem();
 
-		console.log(this);
 		// const hl = new HighlightLayer("hl1", scene);
 		// hl.addMesh(this.ribbon, this.shaderColors.colorA);
 	}
@@ -170,6 +170,12 @@ export class SphereVisualizer {
 			gl_FragColor = vec4(finalColor, 1.0);
 		}
 `;
+	}
+
+	setSeizureMode(seizureMode: boolean) {
+		this.seizureMode = seizureMode;
+		console.log(this.seizureMode);
+		return this?.seizureMode;
 	}
 
 	makeShaderMaterial() {
@@ -305,64 +311,67 @@ export class SphereVisualizer {
 			VertexBuffer.PositionKind,
 		);
 
-		// SET COLORS
-		const chroma = this.features?.chroma ?? [];
-		//SECTION -  SEIZURE MODE
-		// this.shaderMaterial.setColor3(
-		// 	"colorA",
-		// 	this.shaderColors.colorA.multiply(
-		// 		new Color3(
-		// 			Math.sin(chroma?.[9] ?? 1 + this.shaderColors.colorA.r),
-		// 			Math.sin(chroma?.[10] ?? 1 + this.shaderColors.colorA.g),
-		// 			Math.sin(chroma?.[11] ?? 1 + this.shaderColors.colorA.b),
-		// 		),
-		// 	),
-		// );
-		// this.shaderMaterial.setColor3(
-		// 	"colorB",
-		// 	this.shaderColors.colorB.add(
-		// 		new Color3(chroma?.[6] ?? 1, chroma?.[7] ?? 1, chroma?.[8] ?? 1),
-		// 	),
-		// );
-		// this.shaderMaterial.setColor3(
-		// 	"colorC",
-		// 	this.shaderColors.colorC.subtract(
-		// 		new Color3(chroma?.[3] ?? 1, chroma?.[4] ?? 1, chroma?.[5] ?? 1),
-		// 	),
-		// );
-		// this.shaderMaterial.setColor3(
-		// 	"colorD",
-		// 	this.shaderColors.colorD.subtract(
-		// 		new Color3(chroma?.[0] ?? 1, chroma?.[1] ?? 1, chroma?.[2] ?? 1),
-		// 	),
-		// );
-		//!SECTION
-		//SECTION - SMOOTH MODE
-		this.shaderMaterial.setColor3(
-			"colorA",
-			this.shaderColors.colorA.subtract(
-				new Color3(0, 0, Math.sin(this.features?.spectralFlatness || 0)),
-			),
-		);
-		this.shaderMaterial.setColor3(
-			"colorB",
-			this.shaderColors.colorB.subtract(
-				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
-			),
-		);
-		this.shaderMaterial.setColor3(
-			"colorC",
-			this.shaderColors.colorC.add(
-				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
-			),
-		);
-		this.shaderMaterial.setColor3(
-			"colorD",
-			this.shaderColors.colorD.add(
-				new Color3(Math.sin(this.features?.spectralFlatness || 0)),
-			),
-		);
-		//!SECTION
+		if (this.seizureMode) {
+			// SET COLORS
+			const chroma = this.features?.chroma ?? [];
+			//SECTION -  SEIZURE MODE
+			this.shaderMaterial.setColor3(
+				"colorA",
+				this.shaderColors.colorA.multiply(
+					new Color3(
+						Math.sin(chroma?.[9] ?? 1 + this.shaderColors.colorA.r),
+						Math.sin(chroma?.[10] ?? 1 + this.shaderColors.colorA.g),
+						Math.sin(chroma?.[11] ?? 1 + this.shaderColors.colorA.b),
+					),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorB",
+				this.shaderColors.colorB.add(
+					new Color3(chroma?.[6] ?? 1, chroma?.[7] ?? 1, chroma?.[8] ?? 1),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorC",
+				this.shaderColors.colorC.subtract(
+					new Color3(chroma?.[3] ?? 1, chroma?.[4] ?? 1, chroma?.[5] ?? 1),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorD",
+				this.shaderColors.colorD.subtract(
+					new Color3(chroma?.[0] ?? 1, chroma?.[1] ?? 1, chroma?.[2] ?? 1),
+				),
+			);
+			//!SECTION
+		} else {
+			//SECTION - SMOOTH MODE
+			this.shaderMaterial.setColor3(
+				"colorA",
+				this.shaderColors.colorA.subtract(
+					new Color3(0, 0, Math.sin(this.features?.spectralFlatness || 0)),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorB",
+				this.shaderColors.colorB.subtract(
+					new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorC",
+				this.shaderColors.colorC.add(
+					new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+				),
+			);
+			this.shaderMaterial.setColor3(
+				"colorD",
+				this.shaderColors.colorD.add(
+					new Color3(Math.sin(this.features?.spectralFlatness || 0)),
+				),
+			);
+			//!SECTION
+		}
 
 		for (let i = 0; i < vertexPosBuffer.length; i += 3) {
 			const x = vertexPosBuffer[i];
@@ -443,7 +452,6 @@ export class SphereVisualizer {
 			new Vector3(spectralCentroidPercent, (this.features?.zcr ?? 0) / 100, 1),
 			0.05,
 		);
-		console.log(this.features);
 
 		this.shaderMaterial.setFloat("iTime", elapsedTime / 1000); // Convert to seconds
 

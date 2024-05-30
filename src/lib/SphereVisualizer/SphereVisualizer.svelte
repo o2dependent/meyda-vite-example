@@ -2,11 +2,27 @@
 	import Meyda from "meyda";
 	import { onMount } from "svelte";
 	import { BabylonTestApp } from "./App";
+	import {
+		Avatar,
+		DropdownMenu,
+		Label,
+		ScrollArea,
+		Separator,
+		Toolbar,
+	} from "bits-ui";
+	import Play from "../icons/Play.svelte";
+	import Stop from "../icons/Stop.svelte";
+	import ListBullet from "../icons/ListBullet.svelte";
+	import { fly } from "svelte/transition";
+	import MagicWand from "../icons/MagicWand.svelte";
+	import File from "../icons/File.svelte";
 
 	export let audioList: { name: string; url: string }[] = [];
 
 	let loading = true;
 	let isAudioListOpen = false;
+	let isDropdownOpen = false;
+	let currentAudioName = "kthx - tothawall";
 
 	let app: BabylonTestApp;
 
@@ -24,7 +40,7 @@
 		app.setup().then(() => {
 			audioContext = new AudioContext();
 
-			handleRemoteAudio("/audio/kthx - tothawall.mp3").then(
+			handleRemoteAudio("/audio/kthx - tothawall.mp3", "kthx - tothawall").then(
 				() => (loading = false),
 			);
 		});
@@ -81,6 +97,8 @@
 			reader.onload = (e) => {
 				const buffer = e?.target?.result;
 				loadAudioBuffer(buffer).then(setAnalyzer);
+				currentAudioName =
+					file?.name?.split(/.mp3|.mp4/)?.[0] ?? "Custom Audio";
 			};
 
 			reader.readAsArrayBuffer(file);
@@ -101,10 +119,11 @@
 		}
 	};
 
-	const handleRemoteAudio = async (url) => {
+	const handleRemoteAudio = async (url: string, name: string) => {
 		const res = await fetch(url);
 		const buffer = await res.arrayBuffer();
 		loadAudioBuffer(buffer).then(setAnalyzer);
+		currentAudioName = name;
 	};
 
 	let playing = false;
@@ -132,40 +151,113 @@
 </script>
 
 <div
-	class="fixed bottom-2 left-1/2 -translate-x-1/2 container rounded-full px-2 py-1 bg-gray-950 border border-gray-700"
+	class="fixed bottom-2 left-1/2 -translate-x-1/2 container w-fit flex items-center justify-center"
 >
-	<div class="flex gap-2">
-		<button type="button">
-			{loading ? "Loading..." : playing ? "Stop" : "Play"}
-		</button>
-		<button type="button" on:click={() => (isAudioListOpen = !isAudioListOpen)}>
-		</button>
-		<div
-			class="absolutes bottom-full -translate-y-2 left-0 p-2 flex justify-center items-center"
-		>
-			{#each audioList as { name, url }}
-				<!-- content here -->
-				<button
-					class="bg-blue-50"
-					type="button"
-					on:click={() => handleRemoteAudio(url)}
-				>
-					{name}
-				</button>
-			{:else}
-				<p>No audio here!</p>
-			{/each}
-			<input
-				style="width: 10rem;"
-				type="file"
-				accept=".mp3, .mp4"
-				on:change={handleFileChange}
-			/>
+	<Toolbar.Root
+		class="flex h-12 items-center justify-center rounded-10px border border-border bg-background-alt px-[4px] py-1 shadow-mini"
+	>
+		<div class="flex items-center">
+			<Toolbar.Button
+				on:click={!loading ? togglePlay : undefined}
+				class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10"
+			>
+				{#if playing}
+					<Stop class="size-6" />
+				{:else}
+					<Play class="size-6" />
+				{/if}
+			</Toolbar.Button>
+			<Toolbar.Button
+				on:click={() => app.seizureModeToggle()}
+				data-state={app?.seizureMode ? "active" : undefined}
+				class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
+			>
+				<MagicWand class="size-6" />
+			</Toolbar.Button>
 		</div>
-	</div>
+		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
+		<div
+			class="flex items-center max-w-sm overflow-ellipsis whitespace-nowrap h-full w-full px-3"
+		>
+			<p>{currentAudioName}</p>
+		</div>
+		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
+
+		<DropdownMenu.Root
+			open={isDropdownOpen}
+			onOpenChange={(o) => (isDropdownOpen = o)}
+		>
+			<DropdownMenu.Trigger class="">
+				<div class="flex items-center">
+					<Toolbar.Button
+						class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10"
+					>
+						<ListBullet class="mr-2 size-6" />
+						<span class="whitespace-nowrap"> Change music </span>
+					</Toolbar.Button>
+				</div>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content
+				class="w-full max-w-[229px] rounded-xl border border-muted bg-background px-1 py-1.5 shadow-popover"
+				transition={fly}
+				sideOffset={8}
+				side="top"
+			>
+				<DropdownMenu.Label class="py-3 pl-3 pr-1.5"
+					>AudioList</DropdownMenu.Label
+				>
+				<DropdownMenu.Separator class="my-1 -ml-1 -mr-1 block h-px bg-muted" />
+				<ScrollArea.Root class="relative h-[205px] bg-muted rounded-md">
+					<ScrollArea.Viewport class="h-full w-full">
+						<ScrollArea.Content>
+							{#each audioList as { name, url }}
+								<DropdownMenu.Item
+									on:click={() => handleRemoteAudio(url, name)}
+									class="flex pl-3 pr-1.5 h-10 select-none items-center rounded-button py-3 text-sm font-medium !ring-0 !ring-transparent data-[highlighted]:bg-dark-10"
+								>
+									<div class="flex items-center">
+										{name}
+									</div>
+								</DropdownMenu.Item>
+							{:else}
+								<p>No audio here!</p>
+							{/each}
+						</ScrollArea.Content>
+					</ScrollArea.Viewport>
+					<ScrollArea.Scrollbar
+						orientation="vertical"
+						class="flex h-full w-2.5 touch-none select-none rounded-full border-l border-l-transparent p-px transition-all hover:w-3 hover:bg-dark-10"
+					>
+						<ScrollArea.Thumb
+							class="relative flex-1 rounded-full bg-muted-foreground opacity-40 transition-opacity hover:opacity-100"
+						/>
+					</ScrollArea.Scrollbar>
+					<ScrollArea.Corner />
+				</ScrollArea.Root>
+
+				<DropdownMenu.Separator class="my-1 -ml-1 -mr-1 block h-px bg-muted" />
+				<DropdownMenu.Item
+					on:click={() => {
+						const fileInput = document.getElementById("file-input");
+						fileInput?.click();
+					}}
+					class="relative flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium !ring-0 !ring-transparent data-[highlighted]:bg-muted"
+				>
+					<File class="mr-2" />
+					<p>Custom input</p>
+				</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	</Toolbar.Root>
 </div>
+<input
+	id="file-input"
+	class="absolute z-50 left-0 top-0 opacity-0 w-0 h-0 cursor-pointer"
+	type="file"
+	accept=".mp3, .mp4"
+	on:change|stopPropagation={handleFileChange}
+/>
 <canvas
-	on:click={!loading ? togglePlay : undefined}
 	style="width: 100%; height: 100%;"
 	id="babylon-canvas"
 	width="100%"

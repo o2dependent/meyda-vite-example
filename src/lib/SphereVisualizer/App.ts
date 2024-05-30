@@ -34,6 +34,7 @@ export class BabylonTestApp {
 	cameraLight: boolean = true;
 	flashLight: PointLight | null = null;
 	canvas: HTMLCanvasElement;
+	seizureMode: boolean = false;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
@@ -166,6 +167,12 @@ export class BabylonTestApp {
 	setMeydaFeatures(features: Record<string, any>) {
 		this.features = features;
 		this.nodes?.forEach((node) => node?.setMeydaFeatures?.(features));
+	}
+
+	seizureModeToggle() {
+		this.seizureMode = !this.seizureMode;
+		console.log(this.nodes);
+		this.nodes?.forEach((node) => node?.setSeizureMode?.(this.seizureMode));
 	}
 
 	dispose() {
