@@ -11,9 +11,8 @@ import {
 	PointLight,
 	Color4,
 	WebGPUEngine,
+	VideoRecorder,
 } from "@babylonjs/core";
-import { NeonBox } from "./NeonBox";
-import { Tunnel } from "./Tunnel";
 import { SphereVisualizer } from "./SphereVisualizer";
 import type Meyda from "meyda";
 
@@ -24,12 +23,12 @@ export class BabylonTestApp {
 	scene: Scene | null = null;
 	camera: ArcRotateCamera | FreeCamera | null = null;
 
+	recorder: VideoRecorder | null = null;
+
 	analyser: Meyda.MeydaAnalyzer | null = null;
 	features: Record<string, any> = {};
 
-	activeNodes: ("neonBox" | "tunnel" | "sphereVisualizer")[] = [
-		"sphereVisualizer",
-	];
+	activeNodes: "sphereVisualizer"[] = ["sphereVisualizer"];
 	cameraType: "arcRotate" | "free" = "arcRotate";
 	cameraLight: boolean = true;
 	flashLight: PointLight | null = null;
@@ -81,60 +80,26 @@ export class BabylonTestApp {
 		);
 		light1.intensity = 0.2;
 
-		// const plane = MeshBuilder.CreatePlane("plane", { size: 5 }, scene);
-		// plane.rotation.x = Math.PI / 2;
-		// plane.position.y = -1;
-		// plane.position.z = -5;
-		// plane.scaling.x = 5;
-		// plane.scaling.y = 5;
-
 		this.nodes = [];
-		// for (let i = 0; i < 10; i++) {
-		// 	for (let j = 0; j < 10; j++) {
-		// 		const neonBox = new NeonBox(scene, i * j);
-		// 		neonBox.setPosition(15 * i, 0, -15 * j);
-		// 		nodes.push(neonBox);
-		// 	}
-		// }
-
-		if (this.activeNodes.includes("neonBox")) {
-			const neonBox = new NeonBox(scene, 0);
-			neonBox.setPosition(0, 0, 0);
-			this.nodes.push(neonBox);
-		}
-
-		if (this.activeNodes.includes("tunnel")) {
-			const tunnel = new Tunnel(scene);
-			tunnel.setPosition(-50, -50, -50);
-			this.nodes.push(tunnel);
-		}
 
 		if (this.activeNodes.includes("sphereVisualizer")) {
 			const sphereVisualizer = new SphereVisualizer(scene);
 			this.nodes.push(sphereVisualizer);
 		}
 
-		// this.makeBox(scene);
-
-		// const eye1 = new Eye(scene);
-		// eye1.setPosition(0.75, 0, -10);
-		// nodes.push(eye1);
-
-		// const eye2 = new Eye(scene);
-		// eye2.setPosition(-0.75, 0, -10);
-		// nodes.push(eye2);
-
 		// hide/show the Inspector
-		window.addEventListener("keydown", (ev) => {
-			// Shift+Ctrl+Alt+I
-			if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.code === "KeyI") {
-				if (scene.debugLayer.isVisible()) {
-					scene.debugLayer.hide();
-				} else {
-					scene.debugLayer.show();
+		if (import.meta.env.MODE === "development") {
+			window.addEventListener("keydown", (ev) => {
+				// Shift+Ctrl+Alt+I
+				if (ev.shiftKey && ev.ctrlKey && ev.altKey && ev.code === "KeyI") {
+					if (scene.debugLayer.isVisible()) {
+						scene.debugLayer.hide();
+					} else {
+						scene.debugLayer.show();
+					}
 				}
-			}
-		});
+			});
+		}
 
 		// resize the babylon engine when the window is resized
 		window.addEventListener("resize", () => {
@@ -173,6 +138,17 @@ export class BabylonTestApp {
 		this.seizureMode = !this.seizureMode;
 		console.log(this.nodes);
 		this.nodes?.forEach((node) => node?.setSeizureMode?.(this.seizureMode));
+	}
+
+	async startRecording() {
+		if (!this.engine) throw Error("Engine not initialized");
+		this.recorder = new VideoRecorder(this.engine);
+		this.recorder.startRecording("output.webm", 0);
+	}
+
+	async stopRecording() {
+		if (!this.recorder) throw Error("Recorder not initialized");
+		this.recorder.stopRecording();
 	}
 
 	dispose() {

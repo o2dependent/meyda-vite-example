@@ -16,6 +16,7 @@
 	import { fly } from "svelte/transition";
 	import MagicWand from "../icons/MagicWand.svelte";
 	import File from "../icons/File.svelte";
+	import DotFilled from "../icons/DotFilled.svelte";
 
 	export let audioList: { name: string; url: string }[] = [];
 
@@ -23,6 +24,8 @@
 	let isAudioListOpen = false;
 	let isDropdownOpen = false;
 	let currentAudioName = "kthx - tothawall";
+	let willRecord = false;
+	let isRecording = false;
 
 	let app: BabylonTestApp;
 
@@ -134,6 +137,10 @@
 		if (playing || !audioBuffer) {
 			return;
 		}
+		if (willRecord) {
+			isRecording = true;
+			app.startRecording();
+		}
 		source = audioContext.createBufferSource();
 		source.buffer = audioBuffer;
 		source.connect(audioContext.destination);
@@ -149,6 +156,10 @@
 		if (source && playing) {
 			source.stop();
 			playing = false;
+		}
+		if (isRecording) {
+			isRecording = false;
+			app.stopRecording();
 		}
 	};
 
@@ -178,6 +189,12 @@
 				class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
 			>
 				<MagicWand class="size-6" />
+			</Toolbar.Button>
+			<Toolbar.Button
+				on:click={() => (willRecord = !willRecord)}
+				class="inline-flex items-center justify-center rounded-9px px-1.5 py-0 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
+			>
+				<DotFilled class="size-10 {willRecord ? 'text-red-500' : ''}" />
 			</Toolbar.Button>
 		</div>
 		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
