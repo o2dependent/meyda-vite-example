@@ -9,6 +9,7 @@
 		ScrollArea,
 		Separator,
 		Toolbar,
+		Tooltip,
 	} from "bits-ui";
 	import Play from "../icons/Play.svelte";
 	import Stop from "../icons/Stop.svelte";
@@ -173,29 +174,96 @@
 		class="flex h-12 items-center justify-center rounded-10px border border-border bg-background-alt px-[4px] py-1 shadow-mini"
 	>
 		<div class="flex items-center">
-			<Toolbar.Button
-				on:click={!loading ? togglePlay : undefined}
-				class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10"
-			>
-				{#if playing}
-					<Stop class="size-6" />
-				{:else}
-					<Play class="size-6" />
-				{/if}
-			</Toolbar.Button>
-			<Toolbar.Button
-				on:click={() => app.seizureModeToggle()}
-				data-state={app?.seizureMode ? "active" : undefined}
-				class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
-			>
-				<MagicWand class="size-6" />
-			</Toolbar.Button>
-			<Toolbar.Button
-				on:click={() => (willRecord = !willRecord)}
-				class="inline-flex items-center justify-center rounded-9px px-1.5 py-0 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
-			>
-				<DotFilled class="size-10 {willRecord ? 'text-red-500' : ''}" />
-			</Toolbar.Button>
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Toolbar.Button
+						on:click={!loading ? togglePlay : undefined}
+						class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10"
+					>
+						{#if playing}
+							<Stop class="size-6" />
+						{:else}
+							<Play class="size-6" />
+						{/if}
+					</Toolbar.Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content
+					transition={fly}
+					transitionConfig={{ y: 8, duration: 150 }}
+					sideOffset={8}
+				>
+					<div class="bg-background">
+						<Tooltip.Arrow
+							class="rounded-[2px] border-l border-t border-dark-10"
+						/>
+					</div>
+					<div
+						class="flex items-center justify-center rounded-input border border-dark-10 bg-background p-3 text-sm font-medium shadow-popover outline-none"
+					>
+						{#if playing}
+							Stop
+						{:else}
+							Play
+						{/if}
+					</div>
+				</Tooltip.Content>
+			</Tooltip.Root>
+
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Toolbar.Button
+						on:click={() => app.seizureModeToggle()}
+						data-state={app?.seizureMode ? "active" : undefined}
+						class="inline-flex items-center justify-center rounded-9px px-3 py-2 text-sm  font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
+					>
+						<MagicWand class="size-6" />
+					</Toolbar.Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content
+					transition={fly}
+					transitionConfig={{ y: 8, duration: 150 }}
+					sideOffset={8}
+				>
+					<div class="bg-background">
+						<Tooltip.Arrow
+							class="rounded-[2px] border-l border-t border-dark-10"
+						/>
+					</div>
+					<div
+						class="flex items-center justify-center rounded-input border border-dark-10 bg-background p-3 text-sm font-medium shadow-popover outline-none"
+					>
+						Color seizure mode
+					</div>
+				</Tooltip.Content>
+			</Tooltip.Root>
+
+			<!-- FEATURE: RECORDING - LOW QUALITY RECORDING | NEED TO ADD AUDIO INTO AUDIO -->
+			<!-- <Tooltip.Root>
+				<Tooltip.Trigger class="h-full flex justify-center items-center">
+					<Toolbar.Button
+						on:click={() => (willRecord = !willRecord)}
+						class="inline-flex items-center justify-center rounded-9px h-full px-1.5 py-0 text-sm font-medium text-foreground/80 transition-all hover:bg-muted active:scale-98 active:bg-dark-10 [data-state=active]:bg-dark-10"
+					>
+						<DotFilled class="size-10 {willRecord ? 'text-red-500' : ''}" />
+					</Toolbar.Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content
+					transition={fly}
+					transitionConfig={{ y: 8, duration: 150 }}
+					sideOffset={8}
+				>
+					<div class="bg-background">
+						<Tooltip.Arrow
+							class="rounded-[2px] border-l border-t border-dark-10"
+						/>
+					</div>
+					<div
+						class="flex items-center justify-center rounded-input border border-dark-10 bg-background p-3 text-sm font-medium shadow-popover outline-none"
+					>
+						Record canvas
+					</div>
+				</Tooltip.Content>
+			</Tooltip.Root> -->
 		</div>
 		<Separator.Root class="-my-1 mx-1 w-[1px] self-stretch bg-dark-10" />
 		<div
